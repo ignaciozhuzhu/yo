@@ -1,0 +1,641 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  thisurl,
+  serviceurl,
+  ipurl,
+  downDistance,
+  setCookie,
+  getCookie,
+  delCookie,
+  getURLPram,
+  clearCookies,
+  getCityIDByName,
+  reminder,
+  reminderSuccess,
+  getLocalTime,
+  checknull,
+  MoneyConversion,
+  MoneyValue,
+  toDecimal,
+  getMobilTime,
+  plusZero,
+  downloadurl
+} from '../../js/common.js';
+import ReactPullToRefresh from 'react-pull-to-refresh';
+$(document).ready(function() { 
+	//判断登陆与否
+	$.ajax({	  
+		url :  serviceurl+"site/getUserInfo", 
+		type : "get",                                           
+		dataType : "json",  
+		contentType : "application/json",        			    
+		cache : false,  
+		async: false,                                       
+		beforeSend:function(XMLHttpRequest){},                                        
+		success : function(dt){
+			if(dt.status == "redirect"){
+				//表示未登录
+				location.href = "../login.html?backurl=personal/per_mypay.html";
+			}
+		},
+		error:function(XMLHttpRequest, textStatus, errorThrown){
+			reminder(XMLHttpRequest.responseJSON.message);
+			return;
+		}
+	});
+}); 
+var fData = [];
+var rData = [];
+var FR = 0;
+var CurrentPage = "1";
+  let Loading = React.createClass({
+       render() {
+           return(
+               <div className="loading">
+                  <div>加载中...</div>
+               </div>
+           );
+       }
+  });
+
+  let IconLoading =  React.createClass({
+       render() {
+           return(
+               <span className="iconloading"></span>
+           );
+       }
+  });
+//---------------------------Personal_centBox----------------------------------------------------
+var Personal_centBox = React.createClass({
+  render: function() {
+    return (
+    	<div className="weui_navbar per_weui_navbar">
+	        <div className="weui_navbar_item weui_bar_item_on per_mypay_topnav fontsize16 pointer" id="per-pay-n">待支付</div>
+			<div className="weui_navbar_item per_mypay_topnav fontsize16 pointer" id="per-pay-r">已付账单</div>
+	    </div>
+    );
+  }
+});
+//-------------------------Personal_centBox  end---------------------------------------------------
+
+//---------------------------Personal_fBox----------------------------------------------------
+var refleshFdata = function(){
+  $("#login-loading-toast").css("display","block");
+	$.ajax({
+      url: serviceurl+"order/noPay",
+      dataType: 'json',
+      cache: false,
+      data : { "currentPage" : CurrentPage},
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      success: function(dt) {
+        $("#login-loading-toast").css("display","none");
+        console.log(JSON.stringify(dt));
+        if( dt.status == "success"){
+          fData = dt.data;
+        }else if( dt.status == "redirect"){
+          location.href="../login.html"
+        }else{
+          reminder("请稍后再试");
+          return ;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        $("#login-loading-toast").css("display","none");
+        reminder(xhr.responseJSON.message);
+      }.bind(this)
+	});
+};
+
+var refleshFDowndata = function(resolve, reject){
+  $("#login-loading-toast").css("display","block");
+  $.ajax({
+      url: serviceurl+"order/noPay",
+      dataType: 'json',
+      cache: false,
+      data : { "currentPage" : CurrentPage},
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      success: function(dt) {
+        $("#login-loading-toast").css("display","none");
+        console.log(JSON.stringify(dt));
+        if( dt.status == "success"){
+          resolve();
+          fData = dt.data;
+        }else if( dt.status == "redirect"){
+          reject();
+          location.href="../login.html"
+        }else{
+          reject();
+          reminder("请稍后再试");
+          return ;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        reject();
+        $("#login-loading-toast").css("display","none");
+        reminder(xhr.responseJSON.message);
+      }.bind(this)
+  });
+};
+
+var Personal_fBox = React.createClass({
+  getInitialState: function() {
+  	refleshFdata();
+  	return {data: fData};
+  },
+  componentDidMount: function(){
+  	$("#per-pay-n").click(function(){
+  		if( FR%2 == 1){
+  			$("#per-pay-n").addClass("weui_bar_item_on");
+  			$("#per-pay-r").removeClass("weui_bar_item_on");
+  			$("#per-npay-list").css("display","block");
+  			$("#per-rpay-list").css("display","none");
+  			FR++;
+  		}
+  	});
+
+  	$("#per-npay-list").on("click",".per-pay-box",function(e){
+      if(e.target.textContent=="去支付"){
+        delCookie("orderID");
+        setCookie("orderID", $(this).attr("id"));
+        delCookie("gobackURL");
+        setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+        location.href="per_npay_pay.html";
+      }else{
+        delCookie("orderID");
+        setCookie("orderID", $(this).attr("id"));
+        delCookie("gobackURL");
+        setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+        location.href="per_npay_info.html";
+      }
+  	});
+  },
+  handleRefresh(resolve, reject) {
+    refleshFDowndata(resolve, reject);
+    this.props.onCommentSubmit(fData);
+  },  
+  render: function() {
+      if( fData.map == undefined){
+        location.href = "../login.html"
+      }else{
+        if(fData.length>0){
+          var docNodes = fData.map(function(comment) {
+              var doctorname = checknull(comment.doctorname);
+              var doctortitle = checknull(comment.doctortitle);
+              var hospitalname = checknull(comment.hospitalname);
+              var snapshot = checknull(comment.snapshot);
+              var createtime = checknull(getMobilTime(comment.createtime));
+              var totalprice = MoneyConversion(comment.totalprice-comment.reduce);
+              var patientname = checknull(comment.patientname);
+                return (
+                  <NComment 
+                  key={comment.id} 
+                  id={comment.id} 
+                  doctorname={doctorname} 
+                  doctortitle={doctortitle} 
+                  hospitalname={hospitalname} 
+                  snapshot={snapshot.substring(snapshot.indexOf("services")+11,snapshot.indexOf("doctorname")-3)} 
+                  createtime={createtime} 
+                  totalprice={totalprice} 
+                  patientname={patientname} 
+                  ordercontent={checknull(comment.ordercontent)}
+                  >
+                  </NComment>
+              );
+          });
+          return (
+              <div className="listItems">{docNodes}</div>
+          );
+        }else{
+          return (
+            <div className="container-fluid">
+              <div className="per_mypay_zero">
+                <img src="images/Group 3 Copy.png" className="img-responsive"/>
+              </div>
+              <div className="per_mydoc_text">
+                <p className="text-align yayi-color">暂无订单信息</p>
+              </div>
+            </div>
+          );
+        }
+
+    }
+  }
+});
+//-------------------------Personal_fBox  end---------------------------------------------------
+var NComment = React.createClass({
+    render: function() {
+      return (
+		<div className="weui_panel weui_panel_access per-pay-box pointer" id={this.props.id}>
+			<div className="weui_panel_bd">
+				<div className="weui_media_box weui_media_text bordernone per_mypay_nbox">
+					<div className="weui_media_title res-datedet-borbot">
+						<span><img src="images/Group 3.png" width="32px" height="32px"/></span>
+						<span className="per_mypay_docname fontsize19"> {this.props.doctorname} </span>
+						<span className="per_mypay_skill fontsize17 color-3"> {this.props.doctortitle} </span>
+					</div>
+					<div className="weui_media_desc res-det-padleft res-datedet-borbot weui_media_title fontsize17 per_mypay_box_padding">
+						<div className="res-det-padbot">
+							<span className="color-3">就诊医院：</span>
+							<span> {this.props.hospitalname} </span>
+						</div>
+						<div className="res-det-padbot">
+							<span className="color-3">服务内容：</span>
+							<span> {this.props.ordercontent} </span>
+						</div>
+						<div className=" res-det-padbot">
+							<span className="color-3">诊断时间：</span>
+							<span>
+								<span> {this.props.createtime} </span>
+							</span>
+						</div>
+					</div>
+					<div className="weui_media_desc res-det-padleft fontsize17 per_mypay_box_padding">
+						<div className=" res-det-padbot">
+							<span className="color-3">费&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;用：</span>
+							<span> {this.props.totalprice} </span>
+						</div>
+						<div className="res-det-padbot">
+							<span className="color-3">就&nbsp;诊&nbsp;人：</span>
+							<span> {this.props.patientname} </span>
+              <span className="pull-right per-npay-gopay per-npay-gopaybg per-pay-martop-5">去支付</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+      );
+    }
+});
+var RComment = React.createClass({
+    evaluate:function(){
+      // if(this.props.state == 2){
+      //   delCookie("bookingID");
+      //   setCookie("bookingID", this.props.bookingID, 30);
+      //   delCookie("gobackURL");
+      //   setCookie("gobackURL", ipurl + "per_mypay.html", 30);
+      //   location.href="per_rpay_comment.html";
+      // }
+    },
+    render: function() {
+      return (
+    <div className="weui_panel weui_panel_access per-pay-box pointer" id={this.props.id}>
+      <div className="weui_panel_bd">
+        <div className="weui_media_box weui_media_text bordernone per_mypay_nbox">
+          <div className="weui_media_title res-datedet-borbot">
+            <span><img src="images/ic_order.png" width="33px"/></span>
+            <span className="per_mypay_docname fontsize19"> {this.props.doctorname} </span>
+            <span className="per_mypay_skill fontsize17 color-3"> {this.props.doctortitle} </span>
+          </div>
+          <div className="weui_media_desc res-det-padleft res-datedet-borbot weui_media_title fontsize17 per_mypay_box_padding">
+            <div className=" res-det-padbot">
+              <span className="color-3">就诊医院：</span>
+              <span> {this.props.hospitalname} </span>
+            </div>
+            <div className=" res-det-padbot">
+              <span className="color-3">服务内容：</span>
+              <span> {this.props.ordercontent} </span>
+            </div>
+            <div className=" res-det-padbot">
+              <span className="color-3">诊断时间：</span>
+              <span>
+                <span> {this.props.createtime} </span>
+              </span>
+            </div>
+          </div>
+          <div className="weui_media_desc res-det-padleft fontsize17 per_mypay_box_padding">
+            <div className=" res-det-padbot">
+              <span className="color-3">费&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;用：</span>
+              <span> {this.props.totalprice} </span>
+            </div>
+            <div className="res-det-padbot">
+              <span className="color-3">就&nbsp;诊&nbsp;人：</span>
+              <span> {this.props.patientname} </span>
+              <span className={this.props.cssClass} >{this.props.cssName}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      );
+    }
+});
+//---------------------------Personal_rBox----------------------------------------------------
+var refleshRDowndata = function(resolve, reject){
+  $("#login-loading-toast").css("display","block");
+  $.ajax({
+      url: serviceurl+"order/hadPay",
+      dataType: 'json',
+      cache: false,
+      data : { },
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      success: function(dt) {
+        $("#login-loading-toast").css("display","none");
+       if( dt.status == "success"){
+          resolve();
+          rData = dt.data;
+        }else if( dt.status == "redirect"){
+          reject();
+          location.href="../login.html"
+        }else{
+          reject();
+          reminder("请稍后再试");
+          return ;
+        }
+        console.log("success: " + JSON.stringify(dt));
+      }.bind(this),
+      error: function(xhr, status, err) {
+        reject();
+        $("#login-loading-toast").css("display","none");
+        reminder(xhr.responseJSON.message);
+      }.bind(this)
+  });
+};
+
+var refleshRdata = function(){
+  $("#login-loading-toast").css("display","block");
+	$.ajax({
+      url: serviceurl+"order/hadPay",
+      dataType: 'json',
+      cache: false,
+      data : { },
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      success: function(dt) {
+        $("#login-loading-toast").css("display","none");
+       if( dt.status == "success"){
+          rData = dt.data;
+        }else if( dt.status == "redirect"){
+          location.href="../login.html"
+        }else{
+          reminder("请稍后再试");
+          return ;
+        }
+        console.log("success: " + JSON.stringify(dt));
+      }.bind(this),
+      error: function(xhr, status, err) {
+        $("#login-loading-toast").css("display","none");
+        reminder(xhr.responseJSON.message);
+      }.bind(this)
+	});
+};
+
+var Personal_rBox = React.createClass({
+  getInitialState: function() {
+  	refleshRdata();
+  	return {data: rData};
+  },
+  componentDidMount: function(){
+  	$("#per-pay-r").click(function(){
+  		if( FR%2 == 0){
+  			$("#per-pay-r").addClass("weui_bar_item_on");
+  			$("#per-pay-n").removeClass("weui_bar_item_on");
+  			$("#per-rpay-list").css("display","block");
+  			$("#per-npay-list").css("display","none");
+  			FR++; 
+  		}
+  	});
+  	$("#per-rpay-list").on("click",".per-pay-box",function(){
+  		delCookie("orderID");
+  		setCookie("orderID", $(this).attr("id"));
+  		delCookie("gobackURL");
+  		setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+  		location.href="per_rpay_info.html";
+  	});
+  },
+  handleRefresh(resolve, reject) {
+    refleshRDowndata(resolve, reject);
+    this.props.onCommentSubmit(rData);
+  },
+  render: function() {
+     if( rData.map == undefined){
+      location.href = "../login.html"
+    }else{
+      if(rData.length>0){
+        var docNodes = rData.map(function(comment) {
+          var doctorname = checknull(comment.doctorname);
+          var doctortitle = checknull(comment.doctortitle);
+          var hospitalname = checknull(comment.hospitalname);
+          var snapshot = checknull(comment.snapshot);
+          var createtime = checknull(getMobilTime(comment.createtime));
+          var totalprice = MoneyConversion(comment.totalprice-comment.reduce);
+          var patientname = checknull(comment.patientname);
+          var state = checknull(comment.state);
+          var refundstate = comment.refundstate;
+          var CanRefund = comment.CanRefund;
+          var cssClass = "";
+          var cssName = "";
+          // switch (state){
+          //   case 2: //待评价
+          //     // cssClass = "pull-right per-npay-gopay per-pay-martop-5 per-npay-gopaybg";
+          //     // cssName = "去评价";
+          //     //不显示
+          //     cssClass = "";
+          //     cssName = "";
+          //     break;
+          //   case 3: //已完成
+          //     cssClass = "pull-right per-npay-gopay per-npay-overbg per-pay-martop-5";
+          //     cssName = "已评价";
+          //     break;
+          //   default: //不显示
+          //     cssClass = "";
+          //     cssName = "";
+          // }
+          switch (refundstate){
+            case -1: //未退款
+              cssClass = "";
+              cssName = "";
+              break;
+            case 0: //退款中
+              cssClass = "pull-right per-npay-gopay per-npay-overbg per-pay-martop-5";
+              cssName = "退款中";
+              break;
+            case 1: //已退款
+              cssClass = "pull-right per-npay-gopay per-npay-overbg per-pay-martop-5";
+              cssName = "已退款";
+              break;
+            default: //不显示
+              cssClass = "";
+              cssName = "";
+          }
+            return (
+              <RComment 
+              key={comment.id} 
+              id={comment.id} 
+              bookingID={comment.bookingid}
+              state={state}
+              refundstate={refundstate}
+              CanRefund={CanRefund}
+              cssClass={cssClass}
+              cssName={cssName}
+              doctorname={doctorname} 
+              doctortitle={doctortitle} 
+              hospitalname={hospitalname} 
+              snapshot={snapshot.substring(snapshot.indexOf("services")+11,snapshot.indexOf("doctorname")-3)} 
+              createtime={createtime} 
+              totalprice={totalprice} 
+              patientname={patientname} 
+              ordercontent={checknull(comment.ordercontent)}
+              >
+              </RComment>
+          );
+        });
+        return (
+              <div className="listItems">{docNodes}</div>
+        );
+      }else{
+        return (
+            <div className="container-fluid">
+              <div className="per_mypay_zero">
+                <img src="images/Group 3 Copy.png" className="img-responsive"/>
+              </div>
+              <div className="per_mydoc_text">
+                <p className="text-align yayi-color">暂无订单信息</p>
+              </div>
+            </div>
+        );
+      }
+  	}
+  }
+});
+//-------------------------Personal_rBox  end---------------------------------------------------
+
+//-------------------------Personal_loading start-----------------------------------------------
+var Personal_loading = React.createClass({
+  render: function() {
+    return (
+      <div >
+        <div id="loading-toast" ref="loading-toast" className="weui_loading_toast displaynone">
+          <div className="weui_mask_transparent"></div>
+          <div className="weui_toast">
+            <div className="weui_loading">
+              <div className="weui_loading_leaf weui_loading_leaf_0"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_1"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_2"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_3"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_4"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_5"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_6"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_7"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_8"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_9"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_10"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_11"></div>
+            </div>
+            <p className="weui_toast_content text-align" id="loading-toast-text">正在加载</p>
+          </div>
+        </div>
+
+        <div id="success-toast" className="displaynone">
+          <div className="weui_mask_transparent" id="success-toast-mask"></div>
+          <div className="weui_toast">
+            <i className="weui_icon_toast"></i>
+            <p className="weui_toast_content text-align" id="success-toast-text"></p>
+          </div>
+        </div>
+
+        <div id="fail-toast" className="displaynone">
+          <div className="weui_mask_transparent" id="fail-toast-mask"></div>
+          <div className="weui_toast_fail">
+            <p className="text-align" id="fail-toast-text"></p>
+          </div>
+        </div>
+      </div> 
+    );
+  }
+});
+ReactDOM.render(
+  <Personal_loading />,
+  document.getElementById('personal_loading')
+);
+
+//-------------------------Personal_loading end-------------------------------------------------
+
+//-------------------------Personal_downBox-----------------------------------------------------
+var Personal_downBox = React.createClass({
+    mainClick: function(){
+      //主页
+      delCookie("gobackURL");
+      setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+      location.href="per_index.html";
+    },
+    orderClick: function(){
+      //我的订单
+      delCookie("gobackURL");
+      setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+      location.href="per_mypay.html";
+    },
+    messageClick: function(){
+      if(confirm("该功能需要下载app，是否下载？")){
+        //消息点击
+        delCookie("gobackURL");
+        setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+        location.href=downloadurl;
+      }else{
+        return;
+      }
+    },
+    meClick: function(){
+      //我点击事件
+      delCookie("gobackURL");
+      setCookie("gobackURL", ipurl + "/per_mypay.html", 30);
+      location.href="personal.html";
+    },
+  render: function() {
+    return (
+        <div className="weui_tabbar">
+            <div className="weui_tabbar_item per-foot-nav pointer" onClick={this.mainClick}>
+                <div className="weui_tabbar_icon">
+                    <img src="images/ic_home_main.png" className="height-auto"/>
+                </div>
+                <p className="weui_tabbar_label">牙艺</p>
+            </div>
+            <div  className="weui_tabbar_item per-foot-nav pointer" onClick={this.orderClick}>
+                <div className="weui_tabbar_icon">
+                    <img src="images/ic_home_pay_checked.png" className="height-auto"/>
+                </div>
+                <p className="weui_tabbar_label yayi-color">支付</p>
+            </div>
+            <div  className="weui_tabbar_item per-foot-nav pointer" onClick={this.messageClick}>
+                <div className="weui_tabbar_icon">
+                    <img src="images/ic_home_notice.png" className="height-auto"/>
+                </div>
+                <p className="weui_tabbar_label">消息</p>
+            </div>
+            <div  className="weui_tabbar_item per-foot-nav pointer" onClick={this.meClick}>
+              <div className="weui_tabbar_icon">
+                  <img src="images/ic_home_me.png" className="height-auto"/>
+              </div>
+              <p className="weui_tabbar_label">我</p>
+            </div>
+        </div>
+    );
+  }
+});
+
+//-------------------------Personal_rBox  end---------------------------------------------------
+ReactDOM.render(
+  <Personal_centBox />,
+  document.getElementById('centContent')
+);
+ReactDOM.render(
+  <Personal_fBox data={fData} />,
+  document.getElementById('per-npay-list')
+);
+ReactDOM.render(
+  <Personal_rBox data={rData} />,
+  document.getElementById('per-rpay-list')
+);
+ReactDOM.render(
+  <Personal_downBox />,
+  document.getElementById('downContent')
+);

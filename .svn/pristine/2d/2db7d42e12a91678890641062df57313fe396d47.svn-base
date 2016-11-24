@@ -1,0 +1,48 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+	serviceurl,
+	reminder,
+	getURLparam,
+	checknull,
+	getHtmlFontSize
+} from '../../js/common.js';
+
+$(document).ready(function() {
+	getHtmlFontSize();
+})
+
+var Personal_tarBox = React.createClass({
+	render: function() {
+		var phoneNum = "01064328838";
+		var callnum = "tel:" + phoneNum;
+		return (
+			<form className="invite">
+					<div className="form-group">
+						<div className="tit"><h3>诚挚邀请</h3></div>
+						<input type="text" className="form-control formcon height58" id="name" placeholder="姓名" />
+						<input type="text" className="form-control formcon height58" id="phone" placeholder="手机号" />
+						<input type="text" className="form-control formcon height58" id="company" placeholder="工作单位" />
+						<div className="formcon">
+						<label className="radio-inline">
+							<input type="radio" name="inputSex" id="male" value="1" defaultChecked="true"/> 男
+						</label>
+						<label className="radio-inline">
+							<input type="radio" name="inputSex" id="female" value="-1" /> 女
+						</label>
+						</div>
+						<input type="text" className="form-control formcon height58" id="email" placeholder="邮箱" />
+						<button className="btn btn-primary btn-lg btn-block formcon height65">接受邀请</button>
+						 <a href={callnum} className="btn btn-warning btn-lg btn-block formcon height65 glyphicon glyphicon-phone">
+				          一键电话咨询
+				        </a>
+					</div>
+			</form>
+		);
+	}
+});
+ReactDOM.render(
+	<Personal_tarBox />,
+	document.getElementById('content')
+);

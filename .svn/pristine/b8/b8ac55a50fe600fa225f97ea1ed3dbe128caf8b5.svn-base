@@ -1,0 +1,206 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  serviceurl,
+  ipurl,
+  setCookie,
+  delCookie,
+  reminder
+} from '../../js/common.js';
+import {
+  SearchHidden
+} from '../../js/components/searchList.js';
+import {
+  Navigation
+} from '../../js/components/indexComp.js';
+//轮播功能
+import Slider from 'react-touch-slider';
+
+//<Slider autoPlayInterval={3e3} imgs={imgs}/>
+var ExampleSlider = React.createClass({
+  render() {
+    var imgs = [
+      "images/pic_main_home_banner.png"
+    ];
+    return (
+      <div className='ExampleSliders'>
+        <img src="images/pic_main_home_banner.png" width="100%"/>
+      </div>
+    );
+  }
+});
+
+var Hospitalid = "";
+var Personal_mainBox = React.createClass({
+  getInitialState: function() {
+    return {
+      data: []
+    };
+  },
+  componentDidMount: function() {
+    var latitude = "";
+    var longitude = "";
+    navigator.geolocation.getCurrentPosition( // 该函数有如下三个参数
+      function(pos) { // 如果成果则执行该回调函数
+        // alert(
+        //     '  经度：' + pos.coords.latitude +
+        //     '  纬度：' + pos.coords.longitude +
+        //     '  高度：' + pos.coords.altitude +
+        //     '  精确度(经纬)：' + pos.coords.accuracy +
+        //     '  精确度(高度)：' + pos.coords.altitudeAccuracy +
+        //     '  速度：' + pos.coords.speed
+        // );
+        latitude = pos.coords.latitude;
+        longitude = pos.coords.longitude;
+        //alert("latitude: " + latitude + "  longitude: " + longitude);
+        $.ajax({
+          url: serviceurl + "hospital/getCurrHospital",
+          dataType: 'json',
+          cache: false,
+          data: {
+            "pointX": longitude,
+            "pointY": latitude
+          },
+          contentType: "application/json",
+          type: "get",
+          async: false,
+          success: function(data) {
+            console.log("weizhi: " + JSON.stringify(data));
+            if (data.status == "success") {
+              Hospitalid = data.data.id;
+              //医院信息
+
+            } else if (data.status == "fail") {
+              reminder("医院信息查询失败！");
+              return;
+            } else {
+              reminder("医院信息查询错误！");
+              return;
+            }
+          }.bind(this),
+          error: function(xhr, status, err) {
+            console.error(xhr, status, err.toString());
+          }.bind(this)
+        });
+      },
+      function(err) { // 如果失败则执行该回调函数
+        reminder(err.message);
+      }, { // 附带参数
+        enableHighAccuracy: false, // 提高精度(耗费资源)
+        timeout: 3000, // 超过timeout则调用失败的回调函数
+        maximumAge: 1000 // 获取到的地理信息的有效期，超过有效期则重新获取一次位置信息
+      }
+    );
+  },
+
+  goHospital: function() {
+    //预约挂号
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/per_index.html", 30);
+    location.href = "../reservation/reservation_hos.html";
+  },
+  goDoctor: function() {
+    //查找医生
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/per_index.html", 30);
+    location.href = "../search/search.html";
+  },
+  goDownloadApp: function() {
+    //下载app
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/per_index.html", 30);
+    location.href = "http://yayi365.cn";
+  },
+  goDetail: function() {
+    //进入快速预约
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/per_index.html", 30);
+    // location.href="../reservation/reservation_hos_info.html";
+    if (Hospitalid == "") {
+      reminder("还没有定位到医院，请稍等");
+      return;
+    } else {
+      location.href = "../reservation/reservation_doc.html?hospitalID=" + Hospitalid;
+    }
+  },
+  goConsult: function() {
+    reminder("该功能下一版本上线，敬请关注");
+    return;
+  },
+  render: function() {
+    return (
+      <div className="weui_tab"> 
+			<div className="weui_tab_bd">
+				<ExampleSlider />
+
+				<div className="cell pointer" onClick={this.goDetail}>
+					<div className="bd">
+						<div className="weui_cells tmargin0">
+							<div className="weui_cell per_index_padding">
+					            <div className="weui_cell_hd"><img src="images/pinpoint.png" className="text-align per_index_goHos_img" /></div>
+					            <div className="weui_cell_bd weui_cell_primary">
+					                <p className="fontsize15 lmargin1">点击进入当前医院，快速预约</p>
+					            </div>
+					            <div className="weui_cell_ft"></div>
+					        </div>
+						</div>
+					</div>
+				</div>
+
+				<div className="panel tmargin1">
+					<div className="bd">
+						<div className="weui_panel weui_panel_access">
+
+							<div className="weui_panel_bd width40 pull-left per_index_lbox" onClick={this.goHospital}>
+								<a href="#" className="weui_media_box weui_media_appmsg">
+					                <div className="width100 text-align tmargin1">
+					                    <img className="weui_media_appmsg_thumb per_index_limg" src="images/s3@3x.png"/>
+					                    <h4 className="weui_media_title text-align tmargin1">预约挂号</h4>
+					                    <p className="weui_media_desc text-align tmargin05 color-3c">轻松预约只需三步。</p>
+					                </div>
+					            </a>
+							</div>
+
+							<div className="weui_panel_bd width60 pull-left per_index_rbox">
+								<a href="#" className="weui_media_box weui_media_appmsg borderbottom borderleft" onClick={this.goConsult}>
+  	                <div className="weui_media_bd">
+  	                    <h4 className="weui_media_title">免费咨询</h4>
+  	                    <p className="weui_media_desc color-3c">口腔问题随心问</p>
+  	                </div>
+  	                <div className="weui_media_hd rmargin0">
+  	                    <img className="weui_media_appmsg_thumb per_index_rimg" src="images/s2@2x.png" />
+  	                </div>
+  	            </a>
+  	            <a href="#" className="weui_media_box weui_media_appmsg borderleft sec_box" onClick={this.goDoctor}>
+  	                
+  	                <div className="weui_media_bd">
+  	                    <h4 className="weui_media_title">查找医生</h4>
+  	                    <p className="weui_media_desc color-3c">精确查找轻松就医</p>
+  	                </div>
+  	                <div className="weui_media_hd rmargin0">
+  	                    <img className="weui_media_appmsg_thumb per_index_rimg" src="images/s1@3x.png" />
+  	                </div>
+  	            </a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="weui_grids no-border tmargin1 pointer" onClick={this.goConsult}>
+				    <img src="images/s4.png" width="100%" />
+				</div>
+		    </div>
+
+        <Navigation />
+        <SearchHidden toastText="正在查询" />
+		</div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <Personal_mainBox />,
+  document.getElementById('content')
+);

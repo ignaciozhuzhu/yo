@@ -1,0 +1,178 @@
+'use strict';
+import React from 'react';
+import {
+	serviceurl
+} from '../common.js';
+
+var Reservation_dialog = React.createClass({
+	cancelClick: function() {
+		$("#dialog-box").hide();
+	},
+	sureClick: function() {
+		location.href = "../login.html?backurl=reservation/" + this.props.href + ".html?doctorid=" + this.props.getDoctorID;
+	},
+	render: function() {
+		return (
+			<div>
+				<div className="weui_dialog_confirm displaynone" id="dialog-box">
+					<div className="weui_mask"></div>
+					<div className="weui_dialog">
+							<div className="weui_dialog_hd text-align"><strong className="weui_dialog_title">温馨提示</strong></div>
+							<div className="weui_dialog_bd text-align">您还未登录，请先登录</div>
+							<div className="weui_dialog_ft text-align">
+									<a href="#" className="weui_btn_dialog default" onClick={this.cancelClick}>取消</a>
+									<a href="#" className="weui_btn_dialog primary" onClick={this.sureClick}>确定</a>
+							</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+});
+var Reservation_docList = React.createClass({
+	attentClick: function(e) {
+		var that = this;
+		//判断登陆与否
+		$.ajax({
+			url: serviceurl + "site/getUserInfo",
+			type: "get",
+			dataType: "json",
+			contentType: "application/json",
+			cache: false,
+			async: false,
+			beforeSend: function(XMLHttpRequest) {},
+			success: function(dt) {
+				if (dt.status == "redirect") {
+					//表示未登录
+					$("#dialog-box").show();
+				} else {
+					//表示已登录
+					var doctorid = that.props.getDoctorID;
+					var ajaxurl = serviceurl + "attention/";
+					var str = "关注";
+					if (e.target.textContent == "关注") {
+						//添加关注
+						ajaxurl += "add";
+						str = "已关注";
+					} else {
+						//取消关注
+						ajaxurl += "cancel";
+						str = "关注";
+					}
+					$.ajax({
+						url: ajaxurl, //请求的Url
+						type: "post", //提交方式
+						dataType: "json", //请求的返回类型 这里为json	
+						data: JSON.stringify({
+							"doctorid": doctorid
+						}),
+						contentType: "application/json", //内容类型
+						cache: false, //是否异步提交
+						beforeSend: function() {
+							$("#loading-toast").css("display", "block");
+						},
+						success: function(dt) {
+							$("#loading-toast").css("display", "none");
+							if (dt.status == "success") {
+								$("#success-toast-text").css("display", "block");
+								$("#res-docdet-att").text(str);
+								$("#success-toast-text").text("操作成功!");
+								setTimeout(function() {
+									$("#success-toast").css("display", "none");
+								}, 2000);
+							} else if (dt.status == "fail") {
+								$("#fail-toast").css("display", "block");
+								$("#fail-toast-text").text("操作失败!");
+								setTimeout(function() {
+									$("#fail-toast").css("display", "none");
+								}, 2000);
+								return;
+							} else {
+								$("#fail-toast").css("display", "block");
+								$("#fail-toast-text").text("操作失败!");
+								setTimeout(function() {
+									$("#fail-toast").css("display", "none");
+								}, 2000);
+								return;
+							}
+						},
+						error: function() {
+							$("#loading-toast").css("display", "none");
+							$("#fail-toast").css("display", "block");
+							$("#fail-toast-text").text("操作失败!");
+							setTimeout(function() {
+								$("#fail-toast").css("display", "none");
+							}, 2000);
+							return;
+						}
+					});
+				}
+			},
+			error: function(XMLHttpRequest) {
+				//toast.show(XMLHttpRequest.responseJSON.message);
+				return;
+			}
+		});
+	},
+	render: function() {
+		var avatar = serviceurl + this.props.data.avatar;
+		return (
+			<div >
+	    	<div className="bg-img">
+	    		<div className="padding-bottom "></div>
+	            <div className="center-block padding-bottom">
+	                <div className="weui_panel weui_panel_access res-docdet-titbg first-chiled">
+	                    <div className="weui_panel_bd">
+	                        <div className="weui_media_box weui_media_appmsg res-docdet-box ">
+	                            <div className="weui_media_hd res-docdet-mar">
+	                                <img className="img-rounded img-responsive res-docdet-img" src={avatar}/>
+	                            </div>
+	                            <div className="weui_media_bd res-docdet-color res-docget-con">
+	                                <div className="docdet">
+	                                    <span className="weui_media_title pull-left res-docdet-name" ref="doctor-name">{this.props.data.fullname}</span>
+	                                    <span ref="doctor-title">{this.props.data.title}</span>
+	                                </div> 
+	                                <div className="weui_media_desc res-docdet-con">
+	                                    <div className="pull-left res-docdet-con-text">
+	                                        
+	                                        <div className="weui_media_desc res-docget-con">
+	                                            <div className="res-docdet-wid">预约量：<span ref="bookingCount">{this.props.data.bookingCount}</span></div>
+	                                            <div className="res-doc-con-null"></div>
+	                                            <div className="res-docdet-wid">咨询量：<span ref="queryCount">{this.props.data.queryCount}</span></div>
+	                                        </div>
+	                                    </div>
+	                                    <div className="pull-right weui_btn weui_btn_mini weui_btn_primary res-docdet-btn pointer" onClick={this.attentClick}>
+	                                	   <img src="images/Shape@2x.png" width="12px"/><span className="fontsize12+" id="res-docdet-att" ref="res-docdet-att">{this.props.attentive}</span>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+
+			<div className="weui_panel weui_panel_access res-det-marbot">
+	            <div className="weui_panel_bd">
+	                <div className="weui_media_box weui_media_text">
+	                    <div className="weui_media_title bmargin05">
+	                        <span className="res-paddingright8px"><img src="images/Group 6 Copy 2@2x.png" width="15px"/></span>
+	                        <span className="fontsize15">擅长</span>
+	                    </div>
+	                    <div className="weui_media_desc res-det-padleft lmargin1">
+	                        <span className="color-f6" ref="skill">{this.props.data.skill}</span>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+    	</div>
+		);
+	}
+});
+
+
+
+export {
+	Reservation_dialog,
+	Reservation_docList
+};

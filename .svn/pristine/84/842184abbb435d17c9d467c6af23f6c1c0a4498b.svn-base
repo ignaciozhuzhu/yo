@@ -1,0 +1,475 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	thisurl,
+	serviceurl,
+	ipurl,
+	downDistance,
+	setCookie,
+	getCookie,
+	delCookie,
+	getURLPram,
+	clearCookies,
+	getCityIDByName,
+	reminder,
+	reminderSuccess,
+	getLocalTime,
+	checknull,
+	MoneyConversion,
+	MoneyValue,
+	toDecimal,
+	getMobilTime,
+	plusZero
+} from '../../js/common.js';
+import Vld from 'validator';
+$(document).ready(function() { 
+	//判断登陆与否
+	$.ajax({	  
+		url :  serviceurl+"site/getUserInfo", 
+		type : "get",                                           
+		dataType : "json",  
+		contentType : "application/json",        			    
+		cache : false,  
+		async: false,                                       
+		beforeSend:function(XMLHttpRequest){},                                        
+		success : function(dt){
+			if(dt.status == "redirect"){
+				//表示未登录
+				location.href = "../login.html?backurl=personal/per_family.html";
+			}
+		},
+		error:function(XMLHttpRequest, textStatus, errorThrown){
+			reminder(XMLHttpRequest.responseJSON.message);
+			return;
+		}
+	});
+}); 
+var patientID = "";
+
+var Personal_mainBox = React.createClass({
+  getInitialState: function() {
+  	patientID = getURLPram(13);
+  	$("#login-loading-toast").css("display","block");
+  	if(Vld.isNull(getCookie("record")+"")){
+  		$.ajax({	  
+			url : serviceurl+"patient/list",   	 //请求的Url
+			type : "get",                                           //提交方式
+			dataType : "json",                                       //请求的返回类型 这里为json	
+			data : {"id" : patientID},
+			contentType : "application/json",        			     //内容类型
+			cache : false,  										//是否异步提交
+			success : function(data){
+				$("#login-loading-toast").css("display","none");
+				if( data.status == "success"){
+					console.log(JSON.stringify(data.data))
+					var PatientInfo = data.data;	
+					var Time = new Date();
+					var Year = Time.getFullYear();
+						
+					$.each(PatientInfo,function(idx,item){	
+						var Idcard = item.idcard;
+						$("#fullname").val(item.fullname);
+						$("#idcard").val(item.idcard);
+						$("#mobile").val(item.mobile);
+						$("#address").val(item.address);
+						$("#areacode").val(item.areacode);
+						//$("#areacode").val(getCookie("cityID")==""?item.areacode:getCookie("cityID"));
+						//$("#address").val(getCookie("cityName")==""?item.areacode:getCookie("cityName"));
+						if( item.default_patient == null){
+							$("#per-family-update-defaultPatient").css("display","block")
+						}
+						if( Vld.isLength(Idcard+"", {min:15, max:15})){
+							var ageyear = "19"+Idcard.substring(6,8); 
+							if( Year - ageyear < 0){
+								reminder("身份证号有误!");
+								return;
+							}else{
+								$("#birthday").val(Year - ageyear);
+								var sexnum = Idcard.substring(14,15); 
+								$("#gender").val(sexnum % 2 ? "男" : "女");
+								}
+							}
+						if( Vld.isLength(Idcard+"", {min:18, max:18})){
+							var ageyear = Idcard.substring(6,10);
+							if( Year - ageyear < 0){
+								reminder("身份证号有误!");
+								return;
+							}else{
+								$("#birthday").val(Year - ageyear);
+								var sexnum = Idcard.substring(16,17); 
+								$("#gender").val(sexnum % 2 ? "男" : "女");
+							}
+						}
+						if( Idcard == ""){
+							$(".per-family-age").val("");
+							$(".per-family-sex").val("");
+						}
+					});
+
+				}else if( data.status == "redirect"){
+					location.href="../login.html";
+						return;
+				}else{
+						reminder("请稍后再试");
+						return;
+				}
+			},
+			error: function (XMLHttpRequest, textStatus, errorThrown) {
+				$("#login-loading-toast").css("display","none");
+				reminder(XMLHttpRequest.responseJSON.message);
+				return;	
+			}
+		});
+  	}
+  	
+    return {data: []};
+  },
+  componentDidMount: function() {
+	var countycode = getCookie("cityID");
+    var countyName =  getCookie("cityName");
+    if(countycode != "" && countyName != ""){
+		$("#address").val(countyName);
+	    $("#areacode").val(countycode);
+    }
+    if(Vld.isNull(getCookie("record")+"") === false){
+    	var arr = new Array();
+    	arr = getCookie("record").split("|");
+    	this.refs.fullname.value = arr[0];
+	    this.refs.Idcard.value = arr[1]; 
+	    this.refs.gender.value = arr[2];
+	    this.refs.birthday.value = arr[3];
+	    this.refs.mobile.value = arr[4];
+	    setCookie("record","",30);
+    }
+  },
+  chooseCity: function(){
+  	var Fullname = this.refs.fullname.value;
+	var Idcard = this.refs.Idcard.value; 
+	var Mobile = this.refs.mobile.value; 
+	var Gender = this.refs.gender.value;
+	var age = this.refs.birthday.value;
+	delCookie("record");
+	setCookie("record", Fullname + "|" + Idcard + "|" + Gender + "|" + age + "|" + Mobile, 30);
+	console.log(getCookie("record"));
+	delCookie("gobackURL");
+	setCookie("gobackURL", ipurl + "/personal/per_family_update.html", 30);
+	location.href = "per_ads.html";
+  },
+  GetBirthdatByIdNo:function(){
+  	var Time = new Date()
+	var Year = Time.getFullYear()	
+	var Idcard = this.refs.Idcard.value;
+		if(Vld.isLength(Idcard+"", {min:15, max:15})){
+			var ageyear = "19"+Idcard.substring(6,8); 
+		  	if( Year - ageyear < 0){
+			  	reminder("身份证号有误!");
+			  	return;
+			}else{
+			  	this.refs.birthday.value = Year - ageyear;
+				var sexnum = Idcard.substring(14,15); 
+				this.refs.gender.value = (sexnum % 2 ? "男" : "女");
+			 }
+		}else if(Vld.isLength(Idcard+"", {min:18, max:18})){
+			var ageyear = Idcard.substring(6,10);
+			 this.refs.birthday.value = Year - ageyear;
+			 if( Year - ageyear < 0){
+				reminder("身份证号有误!");
+				return;
+			}else{
+			    this.refs.birthday.value = Year - ageyear;
+				var sexnum = Idcard.substring(16,17); 
+				this.refs.gender.value = (sexnum % 2 ? "男" : "女");
+			}
+		}else{
+			reminder("请输入正确的身份证号");
+	  		return;
+		}
+		if( Vld.isNull(Idcard+"")){
+		  this.refs.birthday.value = "";
+		  this.refs.gender.value = "";
+	  	}
+	  	if(Vld.isAlphanumeric(Idcard+"",'en-US') === false){
+	  		reminder("请输入正确的身份证号");
+	  		return;
+	  	}
+  },
+  perFamilyAdd: function(){
+	var Fullname = $("#fullname").val().trim();
+	var Idcard = $("#idcard").val().trim();
+	var Gender = $("#gender").val();
+	var Mobile = $("#mobile").val().trim();
+	var Areacode = $("#areacode").val().trim();
+	var Age = $("#birthday").val();
+	var Address = $("#address").val().trim();
+
+	var Time = new Date();
+	var Year = Time.getFullYear();
+	if(Vld.isNull(Fullname+"")){
+		reminder("请输入姓名");
+		return;
+	}
+	if( Vld.isLength(Fullname+"", {min:1, max:6}) === false){
+		reminder("姓名最多为6个字");
+		return;
+	}
+	if(Vld.isNull(Idcard+"")){
+  		reminder("请输入身份证号");
+  		return;
+  	}
+  	if(Vld.isAlphanumeric(Idcard+"",'en-US') === false){
+  		reminder("请输入正确的身份证号");
+  		return;
+  	}
+  	if(Vld.isLength(Idcard+"", {min:15, max:15})){
+  		var ageyear = "19"+$("#idcard").val().substring(6,8); 
+		if( Year - ageyear < 0){
+			reminder("身份证号有误!");
+			return;
+		}
+  	}else if( Vld.isLength(Idcard+"", {min:18, max:18})){
+  		var ageyear = $("#idcard").val().substring(6,10);
+		if( Year - ageyear < 0){
+			reminder("身份证号有误!");
+			return;
+		}
+  	}else{
+		reminder("请输入正确的身份证号");
+  		return;
+  	}
+  	if( Vld.isMobilePhone(Mobile, 'zh-CN') === false){
+	    reminder("请输入正确手机号!");
+	    return false;
+	}
+	if(Vld.isNull(Gender+"")){
+  		reminder("请输入性别(输入身份证后自动判别)");
+  		return;
+  	}
+  	if(Vld.equals(Gender+"","男")){
+  		Gender = "1";
+  	}else if(Vld.equals(Gender+"","女")){
+  		Gender = "-1";
+  	}else{
+  		Gender = "0";
+  	}
+  	if(Vld.isNull(Age+"")){
+  		reminder("请输入年龄(输入身份证后自动判别)");
+  		return;
+  	}
+  	if(Vld.isNull(Address+"")){
+  		reminder("请选择地区");
+  		return;
+  	}
+  	if(Vld.isNull(Areacode+"")){
+  		reminder("请选择地区");
+  		return;
+  	}
+	$("#login-loading-toast").css("display","block");
+	$.ajax({	  
+		url : serviceurl+"patient/edit",   	 //请求的Url
+		type : "post",                                           //提交方式
+		dataType : "json",                                       //请求的返回类型 这里为json	
+		data : JSON.stringify({
+			"id" : patientID,
+			"fullname" : Fullname,
+			"idcard" : Idcard,
+			"gender" : Gender,
+			"mobile" : Mobile,
+			"areacode" : Areacode,
+			"birthday" : Age,
+			"address" : Address
+		 }),
+		contentType : "application/json",        			     //内容类型
+		cache : false,                                   //是否异步提交
+		success : function(data){
+			$("#login-loading-toast").css("display","none");
+			if( data.status == "success"){
+				reminderSuccess("修改成功","per_family.html");
+			}else if( data.status == "redirect"){
+				location.href="../login.html";
+			}else{
+				reminder("请稍后再试");
+			}
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			$("#login-loading-toast").css("display","none");
+			reminder(XMLHttpRequest.responseJSON.message);
+			return false;	
+		}
+	});
+  },
+  setDefalt: function(){
+  	$("#login-loading-toast").css("display","block");
+  	$.ajax({	  
+		url : serviceurl+"patient/setDefault",   	 //请求的Url
+		type : "post",                                           //提交方式
+		dataType : "json",                                       //请求的返回类型 这里为json	
+		data : JSON.stringify({
+			"patientId" : patientID
+		 }),
+		contentType : "application/json",        			     //内容类型
+		cache : false,                                   //是否异步提交
+		success : function(data){
+			$("#login-loading-toast").css("display","none");
+			if( data.status == "success"){
+				$("#per-family-update-defaultPatient").css("display","none");
+				reminderSuccess("已设为默认联系人","");
+			}else if( data.status == "redirect"){
+					location.href="../login.html";
+			}else{
+					reminder("请稍后再试");
+			}
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			$("#login-loading-toast").css("display","none");
+			reminder(XMLHttpRequest.responseJSON.message);
+			return ;	
+		}
+    });
+  },
+  delClick: function(){
+	$("#login-loading-toast").css("display","block");
+	$.ajax({
+      url: serviceurl+"patient/delete",
+      dataType: 'json',
+      cache: false,
+      data : {"patientId":patientID},
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      success: function(dt) {
+      	$("#login-loading-toast").css("display","none");
+        if( dt.status == "success"){
+			reminder("删除家庭联系人成功！");
+			setTimeout(function(){location.href="per_family.html";}, 2000);
+			
+		}else if(dt.status == "failed"){
+			reminder("删除家庭联系人失败");
+		}else{
+			reminder("删除家庭联系人失败！");
+		}
+      }.bind(this),
+      error: function(xhr, status, err) {
+        $("#login-loading-toast").css("display","none");
+		reminder("删除家庭联系人错误！");
+      }.bind(this)
+    });
+  },
+  goback: function(e){
+      history.go(-1);
+  },
+  render: function() {
+    return (
+      <div>			 
+			<div className="weui_cells weui_cells_form res-add-martop per_adduser_list">
+				<div className="weui_cell pointer">
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">姓名</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin">
+						<input id="fullname" ref="fullname" name="fullname" className="weui_input text-right pointer" type="text" placeholder="请输入真实姓名" />
+					</div>
+				</div>
+				<div className="weui_cell pointer">
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">身份证</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin">
+						<input  id="idcard" ref="Idcard" name="Idcard" className="weui_input text-right pointer" type="number" pattern="[0-9]*" placeholder="请输入真实身份证号" onBlur={this.GetBirthdatByIdNo} />
+					</div>
+				</div>
+				<div className="weui_cell pointer">
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">性别</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin">
+						<input  id="gender" ref="gender" name="gender" className="weui_input text-right pointer" type="text"  disabled="disabled" placeholder="必填" />
+					</div>
+				</div>
+				<div className="weui_cell pointer">
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">年龄</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin">
+						<input  id="birthday" ref="birthday" name="birdthday" className="weui_input text-right pointer" type="number"  disabled="disabled" placeholder="必填" />
+					</div>
+				</div>
+				<div className="weui_cell pointer" onClick={this.chooseCity}>
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">地址</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin" id="per-family-address" ref="per-family-address"  >
+						<input id="address" ref="address" name="address" className="weui_input text-right pointer" type="text" disabled="disabled" />
+						<input id="areacode" ref="areacode" name="areacode" className="weui_input" type="hidden" />
+					</div>
+				</div>
+				<div className="weui_cell pointer">
+					<div className="weui_cell_hd">
+						<label className="weui_label res-add-labcolor">手机号</label>
+					</div>
+					<div className="weui_cell_bd weui_cell_primary text-algin">
+						<input className="weui_input text-right pointer" id="mobile"  ref="mobile" name="mobile" type="number" pattern="[0-9]*" placeholder="用于接收预约短信 请慎重填写" />
+					</div>
+				</div>
+			</div>     
+			
+			
+
+			<div className="weui_cells weui_cells_access displaynone pointer" id="per-family-update-defaultPatient" ref="per-family-update-defaultPatient" onClick={this.setDefalt}>
+				<div className="weui_cell" id="per-info" ref="per-info">
+					<div className="weui_media_desc res-doc-con-text per-family-update-font-color " >设置为默认就诊人</div> 
+				</div>
+			</div>
+
+			<div className="container-fluid">
+				<div className="tpadding50">
+					<a className="weui_btn weui_btn_primary pointer reg-btn" onClick={this.perFamilyAdd}>修改</a>
+					<a className="weui_btn weui_btn_warn pointer reg-btn" onClick={this.delClick}>删除</a>
+				</div>
+		  	</div>
+
+			<div id="loading-toast" ref="loading-toast" className="weui_loading_toast displaynone">
+			    <div className="weui_mask_transparent"></div>
+			    <div className="weui_toast">
+			        <div className="weui_loading">
+			            <div className="weui_loading_leaf weui_loading_leaf_0"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_1"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_2"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_3"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_4"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_5"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_6"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_7"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_8"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_9"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_10"></div>
+			            <div className="weui_loading_leaf weui_loading_leaf_11"></div>
+			        </div>
+			        <p className="weui_toast_content text-align" id="loading-toast-text">正在加载</p>
+			    </div>
+			</div>
+
+			<div id="success-toast" className="displaynone">
+			    <div className="weui_mask_transparent" id="success-toast-mask"></div>
+			    <div className="weui_toast">
+			        <i className="weui_icon_toast"></i>
+			        <p className="weui_toast_content text-align" id="success-toast-text"></p>
+			    </div>
+			</div>
+
+			<div id="fail-toast" className="displaynone">
+			    <div className="weui_mask_transparent" id="fail-toast-mask"></div>
+			    <div className="weui_toast_fail">
+			        <p className="text-align" id="fail-toast-text"></p>
+			    </div>
+			</div>
+		</div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <Personal_mainBox />,
+  document.getElementById('content')
+);

@@ -1,0 +1,37 @@
+
+0.cityID     选择的地市id
+1.hospitalID 当前医院的id
+2.gobackURL  返回页面的URL   加上 "http://"
+3.doctorID   当前的医生id
+4.cityName   选择的地市名称
+
+5.price    医生的出诊价格
+6.role     医生的职称
+7.timedate 医生的出诊日期
+8.timeFlag 医生出诊的时间是上午还是下午
+9.doctorName 医生姓名
+
+10.doctorTitle    医生的名头
+11.hospitalName   医院名称
+12.hospitalAdress 医院地址
+13.patientID	病人id
+14.mobile	电话号码
+
+15.orderID      订单id
+16.bookingID    预约id
+17.proAreacode  前一页面的地址码的页面id
+18.proAddress   前一页面的地址显示的页面id
+19.mobileNum    登录页面手机号
+
+20.latitude     当前地理位置经度
+21.longitude    当前地理位置纬度
+22.workdayID    工作日id
+23.noon		1：上午   0：下午
+24.proName      省名称
+
+25.record       记录已输入的内容   (..|..|..)
+
+delCookie("cityID");
+setCookie("cityID", countycode, 30);
+delCookie("gobackURL");
+setCookie("gobackURL", ipurl + "/reservation/reservation_hos.html", 30);

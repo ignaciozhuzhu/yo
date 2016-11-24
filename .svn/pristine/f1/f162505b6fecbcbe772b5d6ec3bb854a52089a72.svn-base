@@ -1,0 +1,112 @@
+var webpack = require('webpack');
+var path = require("path");
+
+var commonsPlugin =
+    new webpack.optimize.CommonsChunkPlugin('js/share.js');
+
+module.exports = {
+    entry: {
+
+        "personal/js/invite": "./src/personal/js/invite.js",
+
+        "personal/js/per_index": "./src/personal/js/per_index.js",
+        // root
+        "js/login": "./src/js/login.js",
+        "js/loginpassword": "./src/js/loginpassword.js",
+        "js/newpassword": "./src/js/newpassword.js",
+        "js/register": "./src/js/register.js",
+        "js/resetpassword": "./src/js/resetpassword.js",
+
+        // message
+        "message/js/message": "./src/message/js/message.js",
+
+        // search
+        "search/js/search": "./src/search/js/search.js",
+
+        // personal
+        "personal/js/per_about": "./src/personal/js/per_about.js",
+        "personal/js/per_adduser": "./src/personal/js/per_adduser.js",
+        "personal/js/per_ads": "./src/personal/js/per_ads.js",
+        "personal/js/per_booking": "./src/personal/js/per_booking.js",
+        "personal/js/per_case": "./src/personal/js/per_case.js",
+        "personal/js/per_case_info": "./src/personal/js/per_case_info.js",
+        "personal/js/per_collect": "./src/personal/js/per_collect.js",
+        "personal/js/per_family": "./src/personal/js/per_family.js",
+        "personal/js/per_family_update": "./src/personal/js/per_family_update.js",
+        "personal/js/per_feedback": "./src/personal/js/per_feedback.js",
+        "personal/js/per_fullname": "./src/personal/js/per_fullname.js",
+        "personal/js/per_info": "./src/personal/js/per_info.js",
+        "personal/js/per_info_address": "./src/personal/js/per_info_address.js",
+        "personal/js/per_mydoc": "./src/personal/js/per_mydoc.js",
+        "personal/js/per_mypay": "./src/personal/js/per_mypay.js",
+        "personal/js/per_npay_info": "./src/personal/js/per_npay_info.js",
+        "personal/js/per_npay_pay": "./src/personal/js/per_npay_pay.js",
+        "personal/js/per_rpay_comment": "./src/personal/js/per_rpay_comment.js",
+        "personal/js/per_rpay_info": "./src/personal/js/per_rpay_info.js",
+        "personal/js/per_setup": "./src/personal/js/per_setup.js",
+        "personal/js/per_update_psw": "./src/personal/js/per_update_psw.js",
+        "personal/js/personal": "./src/personal/js/personal.js",
+        "personal/js/per_booking_det": "./src/personal/js/per_booking_det.js",
+        "personal/js/per_booking_info": "./src/personal/js/per_booking_info.js",
+        "personal/js/per_cardnum": "./src/personal/js/per_cardnum.js",
+
+        // reservation
+        "reservation/js/reservation_hos_info": "./src/reservation/js/reservation_hos_info.js",
+        "reservation/js/reservation_adduser": "./src/reservation/js/reservation_adduser.js",
+        "reservation/js/reservation_ads": "./src/reservation/js/reservation_ads.js",
+        "reservation/js/reservation_datedet": "./src/reservation/js/reservation_datedet.js",
+        "reservation/js/reservation_det": "./src/reservation/js/reservation_det.js",
+        "reservation/js/reservation_doc": "./src/reservation/js/reservation_doc.js",
+        "reservation/js/reservation_hos": "./src/reservation/js/reservation_hos.js",
+        "reservation/js/reservation_hos_eva": "./src/reservation/js/reservation_hos_eva.js",
+        "reservation/js/reservation_patrep": "./src/reservation/js/reservation_patrep.js",
+        "reservation/js/reservation_resdet": "./src/reservation/js/reservation_resdet.js",
+        "reservation/js/reservation_searchDoc": "./src/reservation/js/reservation_searchDoc.js",
+        "reservation/js/reservation_searchHos": "./src/reservation/js/reservation_searchHos.js",
+        "reservation/js/reservation_rules": "./src/reservation/js/reservation_rules.js",
+        "reservation/js/reservation_hosList": "./src/reservation/js/reservation_hosList.js",
+        "reservation/js/reservation_docList": "./src/reservation/js/reservation_docList.js",
+        "reservation/js/reservation_map": "./src/reservation/js/reservation_map.js",
+        "reservation/js/reservation_comment": "./src/reservation/js/reservation_comment.js",
+        "reservation/js/reservation_success": "./src/reservation/js/reservation_success.js",
+
+    },
+    output: {
+        //path: "./dist",
+        path: path.join(__dirname, 'dist'),
+        filename: "[name].js"
+    },
+    module: {
+        //代码严格审查这步大概需要2-5秒(dev)
+        /*preLoaders: [{
+            test: /\.js$/,
+            loader: "eslint-loader",
+            exclude: /node_modules/
+        }],*/
+        loaders: [{
+            test: /\.css$/,
+            loader: "style!css"
+        }, {
+            test: /\.less$/,
+            loader: 'style-loader!css-loader!less-loader'
+        }, {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/, //写明路径,速度快一倍
+            query: {
+                presets: ['es2015', 'react']
+                    //presets: ["babel-fast-presets/es2015-stage1", "react"] //用这个可以快2-5秒
+            }
+        }]
+    },
+    resolve: {
+        // you can now require('file') instead of require('file.coffee')
+        extensions: ['', '.js', '.json']
+    },
+    plugins: [
+        commonsPlugin
+    ],
+    eslint: {
+        // quiet: true //安静,无warning显示,默认为false,即会显示warning;如无需显示则修改为true.--->该功能需要开启代码审查
+    }
+};

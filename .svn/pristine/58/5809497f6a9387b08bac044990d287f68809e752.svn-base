@@ -1,0 +1,410 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  serviceurl,
+  ipurl,
+  setCookie,
+  getCookie,
+  delCookie,
+  reminder,
+  checknull,
+  getHtmlFontSize
+} from '../../js/common.js';
+
+import {
+  SearchHidden
+} from '../../js/components/searchList';
+
+var data = [];
+var countycode = "";
+var countyName = "";
+var dataSize = 0;
+var currentPage = 1;
+var startX = 0,
+  startY = 0;
+getHtmlFontSize();
+var refleshData = function(search, pageNum) {
+  $.ajax({
+    url: serviceurl + "hospital/list",
+    dataType: 'json',
+    cache: false,
+    data: {
+      "countycode": checknull(countycode),
+      "keyword": search,
+      "currentPage": pageNum
+    },
+    contentType: "application/json",
+    type: "get",
+    async: false,
+    beforeSend: function(XMLHttpRequest) {
+      $("#loading-toast").css("display", "block");
+    },
+    success: function(dt) {
+      $("#loading-toast").css("display", "none");
+      if (dt.data.length == 0) {
+        $("#res-doc-list").html("<div class='text-align res-docoter-color'>未搜索到任何数据</div>");
+        $("#more").css("display", "none");
+      } else {
+        data = dt.data;
+        dataSize = dt.data.length;
+        if (dataSize < 10) {
+          $("#more").css("display", "none");
+        } else {
+          $("#more").css("display", "block");
+        }
+      }
+      console.log("success: " + JSON.stringify(dt));
+      console.log("countycode: " + countycode);
+    }.bind(this),
+    error: function(xhr, status, err) {
+      $("#loading-toast").css("display", "none");
+      reminder(xhr, status, err.toString());
+    }.bind(this)
+  });
+};
+var refleshDownData = function(search, pageNum, resolve, reject) {
+  $.ajax({
+    url: serviceurl + "hospital/list",
+    dataType: 'json',
+    cache: false,
+    data: {
+      "countycode": checknull(countycode),
+      "keyword": search,
+      "currentPage": pageNum
+    },
+    contentType: "application/json",
+    type: "get",
+    async: false,
+    beforeSend: function(XMLHttpRequest) {
+      $("#loading-toast").css("display", "block");
+    },
+    success: function(dt) {
+      resolve();
+      $("#loading-toast").css("display", "none");
+      if (dt.data.length == 0) {
+        $("#res-doc-list").html("<div class='text-align res-docoter-color'>未搜索到任何数据</div>");
+        $("#more").css("display", "none");
+      } else {
+        data = dt.data;
+        dataSize = dt.data.length;
+        if (dataSize < 10) {
+          $("#more").css("display", "none");
+        } else {
+          $("#more").css("display", "block");
+        }
+      }
+      console.log("success: " + JSON.stringify(dt));
+      console.log("countycode: " + countycode);
+    }.bind(this),
+    error: function(xhr, status, err) {
+      reject();
+      $("#loading-toast").css("display", "none");
+      reminder(xhr, status, err.toString());
+    }.bind(this)
+  });
+};
+var appendData = function(search, pageNum) {
+  $.ajax({
+    url: serviceurl + "/hospital/list",
+    dataType: 'json',
+    cache: false,
+    data: {
+      "countycode": countycode,
+      "keyword": search,
+      "currentPage": pageNum
+    },
+    contentType: "application/json",
+    type: "get",
+    async: false,
+    success: function(dt) {
+      dt.data.forEach(function(e) {
+        data.push(e);
+      });
+      dataSize = dt.data.length;
+      if (dataSize < 10) {
+        $("#more").css("display", "none");
+      } else {
+        $("#more").css("display", "block");
+      }
+      //console.log("success: " + JSON.stringify(dt));
+    }.bind(this),
+    error: function(xhr, status, err) {
+      reminder(xhr, status, err.toString());
+    }.bind(this)
+  });
+};
+
+
+
+var Reservation_hosList = React.createClass({
+  nextPage: function() {
+    currentPage++;
+    appendData($("#search_input").val(), currentPage);
+    this.props.onCommentSubmit(data);
+  },
+  componentDidMount: function() {
+    // if(data.length == 0 ){
+    //   $("#res-doc-list").html("<div class='text-align res-docoter-color'>未搜索到任何数据</div>");
+    // }else{
+    //   isTouchDevice();
+    // }
+  },
+  handleRefresh(resolve, reject) {
+    refleshDownData($("#search_input").val(), 1, resolve, reject);
+    this.props.onCommentSubmit(data);
+  },
+  render: function() {
+    var listsize = this.props.data.length;
+    if (listsize < 1) {
+      return (
+        <div className="weui_panel_bd" >
+            <div className='text-align res-docoter-color'>未搜索到任何数据!</div>
+          </div>
+      );
+    } else if (listsize == 10) {
+      var hosNodes = this.props.data.map(function(comment) {
+        var grade = comment.grade;
+        if (grade == "3") {
+          grade = "三";
+        } else if (grade == "2") {
+          grade = "二";
+        } else {
+          grade = "一";
+        }
+        var level = comment.level;
+        if (level == "3") {
+          level = "丙";
+        } else if (level == "2") {
+          level = "乙";
+        } else if (level == "1") {
+          level = "甲";
+        } else {
+          level = "特";
+        }
+        return (
+          <Comment 
+            key={comment.id} 
+            hid={comment.id} 
+            name={comment.name} 
+            grade={grade}
+            level={level}
+            bookingCount={comment.bookingCount}
+            imgs={serviceurl+comment.avatar}
+            address={comment.address}
+            >
+            </Comment>
+        );
+      });
+      return (
+        <div className="weui_panel_bd" >
+              <div className="listItems">{hosNodes}</div>
+              <div className="text-align more_height" id="more" onClick={this.nextPage}>加载更多</div>
+          </div>
+      );
+    } else {
+      var hosNodes = this.props.data.map(function(comment) {
+        var grade = comment.grade;
+        if (grade == "3") {
+          grade = "三";
+        } else if (grade == "2") {
+          grade = "二";
+        } else {
+          grade = "一";
+        }
+        var level = comment.level;
+        if (level == "3") {
+          level = "丙";
+        } else if (level == "2") {
+          level = "乙";
+        } else if (level == "1") {
+          level = "甲";
+        } else {
+          level = "特";
+        }
+        return (
+          <Comment 
+            key={comment.id} 
+            hid={comment.id} 
+            name={comment.name} 
+            grade={grade}
+            level={level}
+            bookingCount={comment.bookingCount}
+            imgs={serviceurl+comment.avatar}
+            address={comment.address}
+            >
+            </Comment>
+        );
+      });
+
+      return (
+        <div className="weui_panel_bd" >
+              <div className="listItems">{hosNodes}</div>
+              <div className="text-align pointer more_height displaynone" id="more" onClick={this.nextPage}>加载更多</div>
+          </div>
+      );
+    }
+
+  }
+});
+var Comment = React.createClass({
+  goDocClick: function() {
+    //测试使用
+    if (countycode == "" || countycode == undefined) {
+      reminder("地点信息还没有选！");
+      return;
+    } else {
+      //设置cookie
+      delCookie("cityID");
+      setCookie("cityID", countycode, 30);
+      delCookie("gobackURL");
+      setCookie("gobackURL", "reservation_hos_info.html");
+      location.href = "reservation_hos_info.html?hospitalID=" + this.props.hid;
+    }
+  },
+  render: function() {
+    return (
+      <div className="weui_panel weui_panel_access pointer clance_border" onClick={this.goDocClick} >
+          <input type="hidden" name="nodeID" value={this.props.hid} />
+          <div className="weui_panel_bd res-hos-listbg" >
+             <div className="weui_media_box weui_media_appmsg res_hos_list clance_border">
+                <div className="weui_media_hd res_hos_imgbox_width" >
+                    <img className="img-responsive center-block wx_avatar_img" src={this.props.imgs}/>
+                </div>
+                <div className="weui_media_bd res-listcss" name="thisNodes">
+                    <div className="hospital">
+                        <span className="weui_media_title res-doc-name res-hos-hoscolor">{this.props.name}</span>
+                    </div> 
+                    <div className="weui_media_desc res-doc-con-text res-hos-concolor">{this.props.address}</div>
+                    <div className="weui_media_desc res-hos-numcolor">
+                        {/*<div className="res-doc-con-yy">{this.props.grade}级{this.props.level}等</div>*/}
+                        <div className="res-doc-con-null"></div>
+                        <div className="res-doc-con-yy">预约量：<span >{this.props.bookingCount}</span></div>
+                    </div>
+                </div>
+             </div>
+          </div>
+      </div>
+    );
+  }
+});
+
+var Reservation_hosSearch = React.createClass({
+  goSearch: function() {
+    setCookie("searchText", "", 30);
+    delCookie("gobackURL");
+    setCookie("gobackURL", "reservation_hos.html");
+    location.href = "reservation_searchHos.html";
+  },
+  chooseCity: function() {
+    //设置返回的url到cookie内
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/reservation/reservation_hos.html", 30);
+    //进入地市选择界面
+    location.href = "reservation_ads.html";
+
+  },
+  labelClick: function() {
+    // var searchText = this.refs.search_text;
+    // searchText.style.display = "none";
+  },
+  inputBlur: function() {
+    // var searchText = this.refs.search_text;
+    // var search = this.refs.search_input;
+    // searchText.style.display = "block";
+    // //执行搜索，同时清空搜索条件
+    // refleshData(search.value,currentPage);
+    // this.props.onCommentSubmit(data);
+  },
+  clearClick: function() {
+    var searchText = this.refs.search_text;
+    var search = this.refs.search_input;
+    search.value = "";
+    searchText.style.display = "block";
+    refleshData("", currentPage);
+    // this.props.onCommentSubmit(data);
+  },
+  render: function() {
+    return (
+      <div className="serch-bg">
+          <div className="weui_search_bar res_hos_padding" ref="search_bar">
+            <form className="weui_search_outer res_search_box"  onClick={this.goSearch}>
+                <div className="weui_search_inner">
+                    <i className="weui_icon_search"></i>
+                    <div type="search" className="weui_search_input" ref="search_input" id="search_input" placeholder="搜索" required onBlur={this.inputBlur}></div>
+                    <a href="javascript:" className="weui_icon_clear" ref="search_clear" onClick={this.clearClick} ></a>
+                </div>
+                <label htmlFor="search_input" className="weui_search_text" ref="search_text" onClick={this.labelClick}>
+                    {/*<i className="weui_icon_search"></i>*/}
+                    <span><img className="search_top" src="images/search2.png" /></span>
+                    <span>搜索医院、医生</span>
+                </label>
+            </form>
+            <a href="javascript:" className="weui_search_cancel" ref="search_cancel">取消</a>
+            <div className="width20 pointer" onClick={this.chooseCity}>
+              <div className="lmargin05 wrap-class text-right">
+                <img src="images/Inverse@3x.png" width="9px" />
+                <span className="lmargin05" id="displayName">{countyName}</span>
+              </div>
+            </div>
+          </div>
+      </div>
+    );
+  }
+});
+
+
+var Reservation_hosBox = React.createClass({
+  getInitialState: function() {
+    //查看cookie内时候有对应的值
+    countycode = getCookie("cityID");
+    countyName = getCookie("cityName");
+    // if(countycode=="" || countycode==undefined  || countyName=="" || countyName==undefined){
+    //   $.getScript('http://pv.sohu.com/cityjson', function(_result) {
+    //     // alert(returnCitySN.cname);
+    //     countycode = returnCitySN.cid;
+    //     countyName = returnCitySN.cname;
+    //     checknull(countycode)==""?"":countycode;
+    //     checknull(countyName)==""?"未定位到地点":countyName;
+    //     if(countyName.indexOf("市")!=-1){
+    //       countyName = countyName.substr(countyName.indexOf("省")+1, countyName.indexOf("市"));
+    //     }
+    //     $("#displayName").html(countyName);
+    //   });
+    // }
+    if (countycode == "" || countycode == undefined || countyName == "" || countyName == undefined) {
+      countyName = "未选择";
+    }
+    $("#displayName").html(countyName);
+    refleshData("", currentPage);
+    return {
+      data: data
+    };
+  },
+  componentDidMount: function() {
+    this.setState({
+      data: data
+    });
+  },
+  handleCommentSubmit: function(comment) {
+    this.setState({
+      data: comment
+    });
+  },
+  render: function() {
+    return (
+      <div>
+        <Reservation_hosSearch onCommentSubmit={this.handleCommentSubmit} />
+        <Reservation_hosList onCommentSubmit={this.handleCommentSubmit} data={this.state.data} />
+        <SearchHidden toastText="正在查询" />
+      );
+      </div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <Reservation_hosBox data={data} />,
+  document.getElementById('content')
+);

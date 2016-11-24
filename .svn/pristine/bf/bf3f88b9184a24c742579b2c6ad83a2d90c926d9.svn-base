@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>北京德贝尔开业邀请函</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css"> 
+    <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main.css?v=1.0?v=1.0" />
+<style>
+    html,body{
+        background-color: #111;
+        overflow:auto;
+    }
+    #content{
+        background: url(images/beijing.png);
+        background-size: cover;
+    }
+</style>
+</head>
+
+<body onload="init()">
+    <div id="content"></div>
+    <div id="mapContainer"></div>
+    <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+    <script src="../js/main.js" charset="utf-8"></script>
+    <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/invite.js" charset="utf-8"></script>
+
+    <script src="https://cache.amap.com/lbs/static/es5.min.js"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.3&key=0e64281e79717140f05f2f7fef8445ab&plugin=AMap.ToolBar">
+    </script>
+    <script>
+        function init() {
+            map = new AMap.Map("mapContainer", {
+                zoom: 13,
+                center:[116.4809505039, 39.9763580271]
+            });
+            marker = new AMap.Marker({
+                map:map,
+                position:[116.4809505039, 39.9763580271]
+            })
+            marker.setLabel({
+                offset: new AMap.Pixel(20, 20),//修改label相对于maker的位置
+                content: "北京德贝尔口腔"
+            });
+            marker.on('click',function(e){
+                marker.markOnAMAP({
+                    name:'德贝尔',
+                    position:marker.getPosition()
+                })
+            })
+        }
+    </script>
+</body>
+</html>

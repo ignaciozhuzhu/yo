@@ -1,0 +1,2365 @@
+/*  定义  */
+html,body{height:100%;overflow:auto;}
+div,form,p,ul,li,ol,dl,dt,dd,h1,h2,h3,h4,h5,h6{ margin:0px;padding:0px;text-align:left;}
+ul,ol,li,dl,dt,dd{list-style:none;}
+body {
+	width:100%;
+	height:100%;
+	color: #000;
+	font: normal 14px "Microsoft Yahei", Arial, Helvetica, sans-serif;
+	line-height: 1.7em;
+	background: #f6f6f6;
+	padding:0;
+	margin:0;
+}
+a:link{text-decoration:none;}
+a:visited{text-decoration:none;}
+a:hover{text-decoration:none;}
+a:active{text-decoration:none;}
+img{vertical-align:middle;}
+.weui_flex{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+}
+.weui_flex_item{
+	-webkit-box-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+}
+.center-block{
+	display: block;
+	margin-left:auto;
+	margin-right:auto;	
+}
+.text-align{text-align:center;}
+.img-circle {
+  border-radius:50%;
+  display: inline-block;
+  max-width: 100%;
+  padding: 0px;
+  line-height: 1.42857143;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  -webkit-transition: all .2s ease-in-out;
+       -o-transition: all .2s ease-in-out;
+          transition: all .2s ease-in-out;
+}
+.img-thumbnail {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  padding: 4px;
+  line-height: 1.42857143;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  -webkit-transition: all .2s ease-in-out;
+       -o-transition: all .2s ease-in-out;
+          transition: all .2s ease-in-out;
+}
+.img-rounded {
+  border-radius: 50%;
+}
+.img-responsive,
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.row {
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+/*不换行超出变...*/
+.wrap-class{
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+.wrap-class-2{
+	overflow:hidden; 
+	text-overflow:ellipsis;
+	display:-webkit-box; 
+	-webkit-box-orient:vertical;
+	-webkit-line-clamp:2; 
+}
+
+.width_auto{width: auto !important;}
+
+.pull-right {float: right !important;}
+.pull-left {float: left !important;}
+.clearfloat{clear:both;}
+.text-left{text-align: left !important;}
+.tmargin0{ margin-top: 0 !important;}
+.tmargin05{margin-top: 5px !important;}
+.tmargin1{ margin-top: 10px !important;}
+.tmargin12{ margin-top: 12px !important;}
+.tmargin2{ margin-top: 20px !important;}
+.tmargin3{ margin-top: 30px !important;}
+
+.tmargin10{margin-top: 10% !important;}
+.lmargin05{margin-left: 5px !important;}
+.lmargin1{margin-left: 10px !important;}
+.lmargin15{margin-left: 15px !important;}
+.lmargin2{margin-left: 20px !important;}
+.lmargin3{margin-left: 30px !important;}
+.lmargin4{margin-left: 40px !important;}
+
+
+.rmargin0{margin-right:0 !important;}
+.rmargin05{margin-right:5px !important;}
+.rmargin1{margin-right:10px !important;}
+.rmargin15{margin-right:15px !important;}
+.rmargin2{margin-right:20px !important;}
+
+.bmargin0{margin-bottom: 0 !important;}
+.bmargin05{margin-bottom: 5px !important;}
+.bmargin1{margin-bottom: 10px !important;}
+.margin_auto{margin:0 auto !important;}
+	
+.bpadding1{padding-bottom: 10px !important;}
+.bpadding05{padding-bottom: 5px !important;}
+
+.lpadding1{padding-left: 10px !important;}
+.lpadding13{padding-left: 13px !important;}
+.lpadding15{padding-left: 15px !important;}
+
+.tpadding05{padding-top: 5px !important;}
+.tpadding1{padding-top: 10px !important;}
+.tpadding4{padding-top: 40px !important;}
+.tpadding50{padding-top: 50% !important;}
+/* 公共样式 */
+.weui_cell:before{left:0px;} /*底部border左侧对齐 border-top: 1px solid transparent;*/
+.w-bg{background:#fff;}
+.yayi-color{color:#5faaf4;}
+.color-3c{color: #ccc;}
+.color-3{color: #777A7D;}
+.color-f6{color: rgba(122,120,120,0.8);}
+.color-black{color: #000;}
+.fontsize19{font-size: 19px !important;}
+.fontsize18{font-size: 18px !important;}
+.fontsize17{font-size: 17px !important;}
+.fontsize16{font-size: 16px !important;}
+.fontsize15{font-size: 15px !important;}
+.fontsize14{font-size: 14px !important;}
+.fontsize13{font-size: 13px !important;}
+.fontsize12{font-size: 12px !important;}
+.fontsize10{font-size: 10px !important;}
+.no-border{border-color: transparent !important;}
+
+.pointer{cursor: pointer;}
+.center-block {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}
+.wx_avatar_img{
+	width: 90px;
+	height: 65px;
+}
+/* 去weui变宽*/
+.weui_media_box.clance_border:before,
+.weui_panel.clance_border:before,
+.weui_cells.clance_border:before,
+.weui_cell.clance_border:before{
+	border-top: 1px solid transparent;
+}
+.weui_panel.clance_border:after,
+.weui_panel_hd.clance_border:after,
+.weui_cells.clance_border:after,
+.weui_cell.clance_border:after{
+	border-bottom: 1px solid transparent;
+}
+.weui_btn.clance_border:after{
+	border: 1px solid transparent;
+}
+/* 个人中心 底部nav */
+.weui_tabbar{
+	height:49px;
+}
+.weui_tab_bd{
+	padding-bottom: 49px;
+}
+.weui_tabbar_icon+.weui_tabbar_label{
+	margin-top:5px;
+	line-height: 10px;
+}
+.weui_tabbar_icon img{
+    width: 90%;
+    margin: 0 auto;
+}
+.weui_tabbar_label{
+	font-size: 10px;
+}
+/* 个人中心 底部nav -结束 */
+.weui_toast_fail{
+	position: fixed;
+    z-index: 99;
+    top: 30%;
+    left: 50%;
+    margin-left: -75px;
+    background: rgba(40,40,40,.75);
+    text-align: center;
+    border-radius: 5px;
+    color: #fff;
+	width:150px;
+	min-height: auto;
+	padding:15px 10px;
+}
+.margintop0{
+	margin-top: 0;
+}
+.tit-tit{
+	text-align:center;
+	width:50%;
+	color:#FFF;
+	font-size:20px;
+}
+.tit-point{
+	text-align:center;
+	color:#FFF;
+	width:20%;
+	white-space:nowrap;
+}
+.bg-img{
+	background:url(../reservation/images/nav@2x.png) no-repeat top;
+	background-size:100% 100%;
+}
+.margin-right15{
+	margin-right: 15px;
+}
+.login-pwdcolor{
+	color: #BFBFBF;
+}
+.login-regcolor{
+	color: #5faaf4;
+}
+/* login 登录注册 2.0*/
+.login_wells_box{
+	width: 4.86rem;
+	height: 1.43rem;
+	margin: 0 auto;
+	border:1px solid #ddd;
+	border-radius:8px;
+	margin-top: .42rem;
+}
+.login_well_name{
+	padding: .14rem .16rem .14rem .27rem;
+}
+.login_input_name{
+	outline: none;
+	border:none;
+	font-size: .21rem;
+}
+.login_well_code{
+	padding: .14rem .27rem;
+}
+.login_input_code{
+	outline: none;
+	border:none;
+	font-size: .21rem;
+}
+.login_reg_btn{
+	width: 1.14rem;
+	height: .43rem;
+    background: #5faaf4;
+    outline: none;
+    border-style: none;
+    color: #FFF;
+    line-height: .43rem;
+    display: inline-block;
+    border-radius: 5px;
+    font-size: .19rem;
+    cursor: pointer;
+}
+.login_btn_box{
+	margin-top: .86rem;
+	width: 4.86rem;
+	height: .64rem;
+	margin-left: auto;
+	margin-right: auto;
+}
+.login_btn{
+	width: 4.86rem;
+	height: .64rem;
+	border-radius: 5px;
+	font-size: .26rem;
+    cursor: pointer;
+}
+.login_protocol_box{
+	text-align: center;
+	margin-top: .31rem;
+}
+.login_protocol_w{
+	text-align: center;
+	color: #83878a;
+	font-size: .19rem;
+}
+.login_protocol_w2,.login_protocol_w2 a{
+	text-align: center;
+	color: #5faaf4;
+	font-size: .19rem;
+}
+
+/* searchHos 医院搜索 2.0*/
+.search_box{
+	border-radius: 8px;
+}
+.search_box_det{
+	padding-left: 41px;
+	padding-right: .1rem;
+}
+.weui_search_inner .weui_icon_search.search_i{
+	left: 12px;
+	top:0;
+}
+.search_titleBox{
+	height: .59rem;
+	padding: 0 .21rem;
+	margin: 0;
+	color: #808080;
+	font-size: .2rem;
+	line-height: .59rem;
+	background-color: #eee; 
+}
+#Hotwords_box{
+	background-color: #eee; 
+}
+.search_sbtn{
+	background-color: #5faaf4;
+	border: none;
+    height: 28px;
+    line-height: 28px;
+    color: #fff;
+}
+.searchHotwords_box{
+	margin: 0 0 .07rem .11rem;
+	width: 1.63rem;
+	height: .54rem;
+	line-height: .54rem;
+  	background: #fff;
+  	display: inline-block;
+  	border-radius:0px;
+  	cursor: pointer;
+  	text-align: center;
+  	font-size: .21rem;
+  	color: #252525;
+}
+.search_history_det{
+	padding: 0 .21rem;
+	height: .69rem;
+	line-height: .69rem;
+}
+.search_history_detall{
+	padding: 0 .21rem;
+	height: .69rem;
+	line-height: .69rem;
+	color: #5faaf4;
+	text-align: center;
+	cursor: pointer;
+}
+.search_history_img{
+	width: 22px;
+}
+.search_history_det > div:first-child{
+	margin-right: .23rem;
+}
+.search_history_det > div:last-child{
+	padding-left: .3rem;
+}
+.search_delete_img{
+	width: 11px;
+}
+.search_more{
+	padding: 0 .21rem;
+	height: .69rem;
+	line-height: .69rem;
+	text-align: center;
+	border-bottom: 1px solid #e5e5e5;
+    background-color: #fff;
+    cursor: pointer;
+    color: #808080;
+}
+/* CityList 开放城市 2.0 */
+.citylist_box{
+	width: 100%;
+	height: auto;
+}
+.city_box{
+	margin-top: .68rem;
+	
+}
+/* reservation_det 预约医生详情页 2.0*/
+.res_top_box_bg{ 
+	background-color: #fff;
+    background-image: url(../reservation/images/res_bg.png);
+    background-position: top;
+    background-repeat: no-repeat;
+    background-size: 100% 43.2%;
+}
+.res_doctor_det_box{
+	padding-top: .33rem;
+	background-color: transparent;
+	position: relative;
+}
+.res_doctor_attention{
+	width: .6rem;
+	height: .6rem;
+	padding-top: .33rem;
+	padding-right: .2rem;
+	font-size: .19rem;
+	line-height: .19rem;
+	color: #fff;
+	text-align: center;
+	position: absolute;
+	right: 0;
+	top: 0;
+	cursor: pointer;
+}
+.res_doctor_attention_img{
+	width: .3rem;
+	height: .3rem;
+}
+.res_doctor_avatar{
+	padding: 0;
+	text-align: center; 
+}
+.res_doctor_avatar_img{
+	width: 1.07rem;
+	height: 1.07rem;
+}
+.res_doctor_det{
+	margin-top: .2rem;
+}
+.res_doctor_name{
+	color: #252525;
+	font-size: .24rem;
+	line-height: .24rem;
+	text-align: center;
+	padding: 0;
+}
+.res_doctor_title{
+	color: #8d8d8d;
+	font-size: .19rem;
+	line-height: .19rem;
+	text-align: center;
+	padding: 0;
+	padding-top: .17rem;
+}
+.res_doctor_hpname{
+	color: #8d8d8d;
+	font-size: .19rem;
+	line-height: .19rem;
+	text-align: center;
+	padding: 0;
+	padding-top: .13rem;
+}
+.res_doctor_rc{
+	color: #8d8d8d;
+	font-size: .19rem;
+	line-height: .19rem;
+	text-align: center;
+	padding: 0;
+	padding-top: .13rem;
+	padding-bottom: .2rem;
+}
+.res_doctor_tool_box{
+	padding-top: .23rem;
+	padding-bottom: .43rem;
+	background-color: #fff;
+}
+.res_doctor_tool_img{
+	width: .65rem;
+	height: .65rem; 
+}
+.res_doctor_tool_word{
+	margin-top: .23rem;
+	color: #252525;
+	font-size: .2rem;
+	text-align: center;
+}
+
+.res_doctor_RC{
+	width: 100%;
+	height: .61rem;
+	border-top: solid 1px #ccc;
+	border-bottom: solid 1px #ccc;
+	position: relative;
+	background-color: #fff;
+}
+.res_doctor_R{
+	color: #6da3fa;
+	font-size: .2rem;
+	line-height: .31rem;
+	text-align: center;
+}
+.res_doctor_C{
+	color: #f08b2d;
+	font-size: .2rem;
+	line-height: .31rem;
+	text-align: center;
+}
+.res_doctor_RC_d_line{
+	position: absolute;
+	left: 50%;
+	top:25%;
+	width: 1px;
+	height: .3rem;
+	background-color: #ccc;
+}
+
+
+.res_doctor_skill_box{
+	margin-top: .14rem;
+	padding: .18rem;
+}
+.res_doctor_skill_title{
+	padding: 0;
+	margin-bottom: .18rem;
+}
+.res_doctor_skill_img{
+	width: .2rem;
+	height: .2rem;
+	margin-right: .13rem;
+}
+.res_doctor_skill_font{
+	color: #252525;
+	font-size: .23rem;
+	line-height: .23rem;
+}
+.res_doctor_skill_word{
+	padding: 0;
+	color: #777a7d;
+	font-size: .21rem;
+	line-height: .25rem;
+}
+.res_doctor_more{
+	height: .69rem;
+	color: #68b0f4;
+	font-size: .19rem;
+	line-height: .57rem;
+	text-align: center;
+	border-top: solid 1px #eee;
+	border-bottom: solid 1px #eee;
+	cursor: pointer;
+}
+
+.res_doctor_comment_word{
+	margin-top: .165rem;
+	margin-bottom: .165rem;
+}
+.res_doctor_comment_det{
+	margin-bottom: .18rem;
+}
+/* 评论页面 comment 2.0*/
+.comment_img{
+	width: .2rem;
+    height: .2rem;
+    margin-right: .13rem;
+}
+.comment_box{
+	border-bottom: solid 1px #eee;
+}
+
+/* 医生排班 resdet 2.0*/
+.weui_panel.res_det_box:first-child{
+	margin-top: .18rem;
+	margin-bottom: .18rem;
+}
+
+/* 预约 datedet 2.0 */
+.weui_panel.datedet_top_box:first-child{
+	margin-top: .17rem;
+	padding: 0 .21rem;
+}
+.datedet_top_tit_box{
+	padding: 0;
+}
+.datedet_top_tit_img{
+	width: .4rem;
+	height: .4rem;
+	margin-right: .21rem;
+}
+.weui_media_box.weui_media_text .weui_media_title.res_datedet_top_tit{
+	padding: .19rem 0;
+	margin-bottom: 0;
+	border-bottom: dotted 3px #ccc;
+}}
+.res_datedet_top_font{
+	color: #252525;
+	font-size: .24rem;
+	margin-right: .21rem;
+}
+.res_datedet_top_tit_font{
+	color: #252525;
+	font-size: .2rem;
+}
+.weui_media_box .weui_media_desc.res_datedet_top_det{
+	padding-top: .21rem;
+	padding-bottom: .21rem;
+	font-size: .23rem;
+}
+
+.datedet_form_box{
+	margin-top: .17rem;
+}
+.datedet_form_cell{
+	padding: .21rem;
+	cursor: pointer;
+	color: #252525;
+	font-size: .23rem;
+}
+
+.datedet_btn_box{
+    margin-top: .37rem;
+    padding: 0 .21rem;
+    margin-bottom: .17rem; 
+}
+
+/* 患者报道 res_patrep 2.0*/
+.patrep_box_poistion{
+	position: relative;
+}
+.res_pat_box{
+	margin-top: .18rem;
+}
+.patrep_form_cell{
+	padding: .3rem .22rem;
+    cursor: pointer;
+    color: #252525;
+    font-size: .23rem;
+}
+.res_pat_textarea{
+	height: 1.4rem;
+	font-size: .224rem;
+	line-height: .28rem;
+}
+.res_pat_textarea_counter{
+	color: #000;
+	font-size: .224rem;
+	line-height: .23rem;
+}
+
+.res_pat_btn_box{
+	position: fixed;
+	width: 100%;
+	bottom: 1.12rem;
+}
+.res_pat_btn_primary{
+    width: 4.57rem;
+    height: .64rem;
+    line-height: .64rem;
+    font-size: .26rem;
+    cursor: pointer;
+    margin-left: auto;
+	margin-right: auto;
+}
+/* 预约提交成功 res_success 2.0*/
+.res_success_msg{
+	margin-top: 1.56rem;
+	width: 4.57rem;
+	margin-left: auto;
+	margin-right: auto;
+}
+.weui_msg .weui_icon_area.res_success_icon_area{
+	margin-bottom: .64rem;
+	text-align: center;
+}
+.res_success_img{
+	width: .73rem;
+	height: .73rem;
+}
+.weui_msg .weui_msg_title.res_success_tit{
+	text-align: center;
+	color: #252525;
+	font-size: .29rem;
+	line-height: .29rem;
+	margin-bottom: .61rem;
+}
+.weui_msg .weui_msg_desc.res_success_desc{
+	text-align: center;
+	color: #8d8d8d;
+	font-size: .23rem;
+	line-height: .28rem;
+}
+.weui_msg .weui_text_area.res_success_text_area{
+	margin-bottom: 2.43rem;
+	padding: 0;
+}
+.res_success_btn_area{
+	margin: 1.17647059em 0 .5em;
+}
+.res_success_btn_primary{
+	height: .64rem;
+	line-height: .64rem;
+	font-size: .26rem;
+	cursor: pointer;
+}
+/* 注册样式*/
+.reg-padding{
+	padding-top:8%;	
+}
+.reg-margin{
+	margin-top:8%;	
+}
+.padding-bottom{
+	padding-bottom:3%;	
+}
+.tit-agree a:link{color:#5faaf4;text-decoration:none;}
+.tit-agree a:visited{color:#5faaf4;text-decoration:none;}
+.tit-agree a:hover{color:#5faaf4;text-decoration:none;}
+.tit-agree a:active{color:#5faaf4;text-decoration:none;}
+.width100{
+	width:100%;
+}
+.reg-btn-second{
+	background:#5faaf4;
+	outline:none;
+	border-style:none;
+	color:#FFF;
+}
+
+.reg-btn-first{
+	background:#5faaf4;
+	outline:none;
+	border-style:none;
+	color:#FFF;
+	line-height: 1.9;
+	padding: 0 .75em;
+	display: inline-block;
+	border-radius:5px;
+}
+
+/* 登陆样式 */
+.tit-reg a:link{color:#5faaf4;text-decoration:none;}
+.tit-reg a:visited{color:#5faaf4;text-decoration:none;}
+.tit-reg a:hover{color:#5faaf4;text-decoration:none;}
+.tit-reg a:active{color:#5faaf4;text-decoration:none;}
+
+.tit-forpwd a:link{color:#83878a;text-decoration:none;}
+.tit-forpwd a:visited{color:#83878a;text-decoration:none;}
+.tit-forpwd a:hover{color:#83878a;text-decoration:none;}
+.tit-forpwd a:active{color:#83878a;text-decoration:none;}
+
+/* 预约挂号-公共样式 */
+.res-listcss{
+	white-space:nowrap;
+	overflow:hidden;
+	color:#7a7878;
+}
+
+
+/* 预约挂号-医院 */
+.color-about{
+	color: #545454;
+}
+.res_search_box{
+	width: 70%;
+}
+.res_address_box{
+	width: 95px;
+}
+.serch-bg{
+	background: #5faaf4;	
+}
+.res_hos_padding{
+	padding: 5px 10px;
+}
+.res-img{
+	width:.9rem;
+	height: .9rem;
+	border: 1px solid #dcdcdc;
+}
+
+.hospital-cycle{
+	background:#FFF;
+}
+
+.res-hos-tit{
+	color:#434242;
+	overflow:hidden;	
+}
+.weui_media_box.weui_media_appmsg .weui_media_hd.res_hos_imgbox_width{
+	width: 90px;
+}
+.res-hos-desc{
+	color:#7a7878;	
+}
+
+.res-hos-listbg{
+	border-bottom:solid 1px #d6d6d6;
+}
+
+.res-hos-hoscolor{
+	color:#434342;	
+}
+
+.res-hos-concolor{
+	color:#7a7878;	
+}
+
+.res-hos-numcolor{
+	color:#f2a735;	
+}
+.res_hos_refresh{
+	overflow: hidden;
+	position: relative;
+	text-align: center;
+}
+
+/* 预约挂号-医生 */
+.res-docoter-color{
+	color: #9b9b9b;
+}
+.weui_media_box.res_hos_list{
+	padding:.1786rem .1428rem;
+}
+.weui_search_bar.weui_search_bar_top_bprder:before{
+	border-top:0;
+}
+.doctor .res-doc-name{
+	bottom:0px;
+	width:80px;
+	display:inline-block;
+	color:#262525;
+}
+.res_doc_imgbox{
+	width: 75px !important;
+}
+.res-doc-hosbtn{
+	bottom:0px;
+	margin-right:0;
+	background-image: url(../reservation/images/reshos2@3x.png);
+	background-size: contain;
+}
+
+.res-doc-con{
+	margin-bottom:0px;
+	margin-top:5px;	
+	line-height: 17px !important;
+}
+
+.res-doc-con-yy{
+	width:1.4286rem;
+	display:inline-block;
+	overflow:hidden;
+	text-overflow:ellipsis;	
+}
+
+.weui_media_box .res-doc-con-text{
+	display:inline-block;
+	width:100%;
+	overflow:hidden;
+	text-overflow:ellipsis;	
+	line-height: 15px;
+	margin-top: 6px;
+}
+
+/* 预约挂号——医生详情  */
+.res_det_bottom_text{
+	color: #888;
+}
+.hos_index_img{
+	width: 15px;
+	margin-bottom: 5px;
+	vertical-align: middle;
+}
+.res_doc_gohos{
+	padding:5px 10px;
+	border-bottom: solid 1px #ccc; 
+}
+.res-docdet-titbg{
+	background:none;
+	position:static;
+	
+}
+.res-docdet-share{
+	text-align:right;
+}
+.res-docdet-img{
+	width:60px;
+	height: 60px;	
+}
+.res-doc-martop5{
+	margin-top: 5px;
+}
+.res-docdet-box{
+	padding:0 10px !important;
+}
+.weui_media_box.weui_media_appmsg .res-docdet-mar{
+	margin-right:0;
+	width:75px;
+}
+.res-docdet-color{
+	white-space:nowrap;
+	overflow:hidden;
+	color:#fff;
+}
+.res-docdet-addwid{
+	width:100%;
+	display:inline-block;
+	overflow:hidden;
+	text-overflow:ellipsis;	
+}
+.res-docdet-wid{
+	width:100%;
+	display:inline-block;
+	overflow:hidden;
+	text-overflow:ellipsis;		
+}
+.docdet .res-docdet-name{
+	width:80px;
+	display:inline-block;
+}
+.weui_media_box .res-docdet-con{
+	display:inline-block;
+	width:100%;
+	overflow:hidden;
+	text-overflow:ellipsis;	
+}
+.res-docdet-con-text{
+	width:65%;
+}
+.weui_btn.res-docdet-btn{
+	display:inline-block;
+	text-align:center;
+	background:none;
+	border:solid 1px #FFF;
+	padding:0 8px;
+	font-size: 12px;
+}
+.weui_btn.res-docdet-btn:after{
+	border:solid 1px transparent;
+}
+.res-docget-con{
+	padding-top:5px;	
+}
+.res_det_paddingBox{
+	padding:8px;
+	height: .67rem;
+	font-size: .19rem;
+	line-height: .67rem;
+}
+.res_det_bottom_box{
+	width: 100px;
+	padding: 13px 0 0 0;
+	margin: 0 auto;
+}
+.res_det_bimg{
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 22px;
+}
+/*  预约挂号——地区选择 */
+.res-ads-padleft{
+	padding-left:15px;	
+}
+
+.res-ads-now{
+	background:#fff;
+	padding:15px;
+	font-size:16px;
+	color:#575555;
+}
+.bor-bottom{
+	border-bottom:solid 1px #e3e3e3;	
+}
+.bor-left{
+	border-left:solid 1px #e3e3e3;	
+}
+.bor-right{
+	border-right:solid 1px #e3e3e3;	
+}
+.res-ads-pro{
+	width:45%;
+	float:left;
+	background:#fff;	
+}
+.posit{
+	width:100%;
+	position:static;
+	left:0;	
+}
+.posit-fixed{	
+	width:100%;
+	position:fixed;
+	top:0;
+	left:0;
+}
+.posit-relative{
+	width:100%;
+	position:relative;
+	top:0;
+	left:0;	
+}
+.res-ads-city{
+	width:55%;
+	float:left;
+	background:#fff;
+}
+.res-ads-pro-g{
+	padding:12px 15px;
+	border-top:solid 1px #D6D6D6;
+	border-right:solid 1px #D6D6D6;	
+	background:#EFEFEF;
+	font-size: 14px;	
+	color: #575555;
+}
+.res-ads-pro-w{
+	padding:12px 35px;
+	border-bottom:solid 1px #fff;
+	border-top:solid 1px #D6D6D6;
+	border-right:solid 1px #D6D6D6;	
+	border-left:solid 1px #D6D6D6;	
+	background:url(../reservation/images/ic_Triangle%20Copy@2x.png) no-repeat  15px 50%;
+	background-size:12px auto;
+	font-size: 14px;	
+	color: #575555;
+}
+.res-ads-city-g{
+	padding:12px 15px;
+	border-bottom:solid 1px #D6D6D6;
+	border-top:solid 1px #D6D6D6;
+	border-right:solid 1px #D6D6D6;	
+	border-left:solid 1px #D6D6D6;	
+	background:#eee;
+	font-size: 14px;
+}
+.res-ads-city-w{
+	padding:12px 20px;
+	border-top:solid 1px #D6D6D6;	
+	font-size: 14px;
+}
+
+/* 医生详情信息 */
+.weui_media_title.res-det-borbot.res-det-marbot{
+	margin-bottom:5px;	
+}
+.res-det-marbot{
+	margin-bottom:10px;	
+}
+.res-det-pad15{
+	padding:0 15px;
+}
+.res-det-color{
+	font-size:14px;
+	color:#5faaf4;	
+}
+.res-det-borbot{
+	border-bottom:solid 1px #ccc;	
+}
+.res-det-padbot{
+	padding-bottom:5px;
+}
+.res-det-marbot-mx{
+	margin-bottom:5px;	
+}
+#det-eva .displaynone{
+	display:none;	
+}
+.displaynone{
+	display:none;	
+}
+.weui_media_desc.res-det-padleft.res-det-marbot-mx.displaynone{
+	display:none;	
+}
+
+/* 预约规则 */
+ .res_rules_p{
+ 	font-size: 13px;
+    line-height: 1.2;
+ }
+/* 添加联系人 */
+.weui_cells.weui_cells_form .text-align input::-ms-input-placeholder{text-align: right;}
+.weui_cells.weui_cells_form .text-align input::-webkit-input-placeholder{text-align: right;}
+.weui_cells.weui_cells_form .text-align input{text-align: right;}
+.res-add-tit{
+	font-size:18px;
+}
+.res-add-martop{
+	margin-top:0;	
+}
+.res-add-labcolor{
+	color:#aaa;	
+}
+.text-right{
+	text-align:right;	
+}
+/* 预约挂号-提交预约  */
+.weui_media_desc.res-det-padleft.res-data-det-font{
+	font-size:16px;	
+}
+.weui_actionsheet_cell.res-datedet-stopclick:active{background-color:#FFF;}
+.res-datedet-stopclick{
+	color:#9c9c9c;	
+}
+.res-datedet--padleft{
+	margin-left:-10%;	
+}
+.res-datedet-fontsize18{
+	font-size:18px;	
+}
+.res-datedet-fontsize15{
+	font-size:15px;	
+}
+.res-datedet-fontsize16{
+	font-size:16px;	
+}
+.res-datedet-margintop0{
+	margin-top:0;
+}
+.res-datedet-margin{
+	margin:15px 0;	
+}
+.res-datedet-borbot{
+	border-bottom:solid 1px #e4e4e4;
+	padding-bottom:8px;	
+}
+.res-datedet-pad-0-5{
+	text-align: center;
+	display:inline-block;
+}
+.res-datedet-list{
+	max-height: 300px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+.res-datedet-list::-webkit-scrollbar { 
+    display: none; 
+	width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+/* 预约挂号-医生日程表 */
+.clearfix:before, .clearfix:after { content:""; display:table; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
+
+.resdet-data-table-li{
+	float:left;
+	width: 50px;
+	height: 48px;
+	font-size: 12px;
+	line-height: 24px;
+	text-align: center;
+}
+.res-det-tableh{
+	height: 178px;
+}
+.scroll{
+	overflow-y: hidden;
+	overflow-x: scroll;
+	max-width: 854px;
+}
+.scroll::-webkit-scrollbar { 
+    display: none; 
+	width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+.hh{
+	width:854px;
+}
+.padding8{
+	padding: 0 8px;
+}
+.divulli{
+	width: auto;
+	overflow: hidden;
+	position: relative;
+}
+.border1{
+	border:solid 1px #ccc;
+	position: relative;
+	width: auto;
+}
+.width150{
+	border:solid 1px #ccc;
+	width:100px;
+	height: 100px;
+}
+#res-resdet-table td a:link{color:#fff;text-decoration:none;}
+#res-resdet-table td a:visited{color:#fff;text-decoration:none;}
+#res-resdet-table td a:hover{color:#fff;text-decoration:none;}
+#res-resdet-table td a:active{color:#fff;text-decoration:none;}
+.res-resdet-position{
+	overflow:auto; 
+}
+.res-resdet-lefttable{
+	width:33px;
+	position:relative;
+}
+.res-resdet-lefttable-height{
+	width:33px;
+	height:48px;
+}
+.res-resdet-border-blue{
+	border:solid 1px #5faaf4;
+}
+.res-resdet-bortop-blue{
+	border-top:solid 1px #5faaf4;
+}
+.res-resdet-borbot-blue{
+	border-bottom:solid 1px #ccc;
+}
+.res-resdet-borbot-blue-2{
+	border-bottom:solid 1px #5faaf4;
+}
+.res-resdet-borright-blue{
+	border-right:solid 1px #ccc;
+}
+.res-resdet-borleft-blue{
+	border-left:solid 1px #5faaf4;
+}
+.res-resdet-padding{
+	padding:5px;	
+}
+.res-resdet-table-con{
+	border-collapse:collapse;
+}
+.res-resdet-wh{
+	width:50px;
+	height:46px;	
+}
+.res-resdet-bg-color{
+	background:#5faaf4;
+	color:#fff;	
+}
+.res-resdet-bg-color-no{
+	background:#ccc;
+	color:#fff;	
+	line-height: 48px;
+}
+/* 搜索医生 */
+.res_searchHotwords_box{
+	margin: 8px 10px;
+  	background: #ccc;
+  	padding: 8px 15px;
+  	display: inline-block;
+  	border-radius:10px;
+}
+.search_btn_box{
+	width: auto;
+	padding-left:10px;
+	padding-right:0px;
+	height: 28px;
+}
+.clean-history{
+	width: 100%;
+}
+
+.weui_btn.weui_btn_mini.search_btn{
+	height: 28px;
+	line-height: 28px;
+}
+.res_ser_title{
+	padding-left: 10px;
+}
+.search_my_label{
+	padding-left: 40px;	
+	color: #575555;
+	font-size: 14px;
+	border-bottom: 1px solid #d6d6d6;
+}
+.weui_cell.search_my_label:before{
+	border-top: 1px solid transparent;
+}
+.search_list{
+	padding-left: 16px;
+	padding-right: 16px;
+}
+.search_radius{
+	border-radius: 5px;
+}
+.weui_navbar_item.search-sel-off{
+	padding:8px 0;
+	font-size: 14px;
+	color: #9B9B9B;
+}
+.weui_navbar_item.search-sel-off:after{
+    transform: scaleY(0.6);
+    top: -5px;
+}
+.weui_panel.search_noborder:before{
+	border-top:1px solid transparent;
+}
+.search-bg{
+	background:none;
+}
+.search-overflow{
+	display:inline-block;
+	overflow:hidden;
+	text-overflow:ellipsis;	
+	white-space:nowrap;
+}
+.search-sel-on {
+	background: #fff;
+	color: #5DA5F0 !important;
+}
+.search-padding0{
+	padding:0;
+}
+.search-padding-3-0{
+	padding: 3% 0;
+}
+.search-pos-rel{
+	position: relative;
+}
+.search-width10{
+	width: 10%;
+}
+.search-padrig5{
+	padding-right: 5px;
+}
+.search-list{
+	width:100%;
+	padding-bottom:0;
+	background:#fff;
+	border-bottom:solid 1px #ccc;
+	position: absolute;
+	height: auto;
+	z-index: 99;
+}
+.list-list{
+	z-index: 10;
+}
+
+.search-doctor-list{
+	position:relative;
+	padding-bottom:0;
+}
+.search-mask{
+	background: rgba(0,0,0,.6);
+	position: fixed;
+	left: 0;z-index: 1;
+	width: 100%;
+	height: 100%;
+}
+
+/* 消息中心 */
+.mes-bg-img{
+	background:url(../message/images/nav@2x.png) no-repeat top;	
+	background-size: 100% 100%;
+}
+.weui_media_box.weui_media_appmsg .mes-width20{
+	width:20%;
+}
+.mes-tit-color{
+	color:#ccc;
+}
+.mes-news{
+	background: #e64340;
+	border-radius:25px;
+	color: #fff;
+	font-size: 12px;
+	width:23px;
+	text-align: center;
+}
+.weui_media_desc.mes-doc-con-text{
+    display: inline-block;
+    width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* 个人中心-我 */
+.weui_tabbar:before{
+	border-top: 1px solid #B7B8B9;
+}
+.per_my_box{
+	margin-top: 0;
+	height: 100px;
+}
+.my_cell{
+	padding: 12px 19px 13px 20px;
+}
+.per_avatar_box{
+	width: 75px;
+}
+.per_avatar_tit{
+	margin-left: 22px;
+}
+
+.per-ads{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+.weui_cells_access .weui_cell_ft.per-account:after{
+	border-style:none;
+}
+.per-imggroup{
+	width: 22px;
+}
+.per-width8{
+	width:77px;
+}
+.per-width70{
+	width:70%;
+}
+.displayblock{
+	display: block;
+}
+.per-margintop5{
+	margin-top: 10px;
+	color:#ccc;
+}
+.per-borbot{
+	border-bottom: solid 1px #eee;
+}
+.weui_cell.per-borbot:before{
+	border-top: solid 1px transparent;
+}
+.per-width80{
+	width: 80%;
+}
+.weui_tabbar_icon .height-auto{
+	height:auto;
+}
+.personal_paddingBox > .weui_cell{
+	padding:12px 19px 13px 20px;
+}
+/* 我-我的医生 */
+.more_height{
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px solid #e5e5e5;
+	background-color: #fff;
+	cursor: pointer;
+}
+.per_mydoc_zero{
+	width: 87px;
+	margin-right: auto;
+	margin-left: auto; 
+	margin-top: 110px;
+}
+.per_mydoc_text{
+	margin-top: 64px;
+}
+.per_mydoc_btn{
+	margin-top: 129px;
+}
+.weui_navbar_item.weui_navbar_item_right_border:after{
+	 border-right:0;
+}
+.weui_bar_item_on{
+	border-bottom: solid 2px #5faaf4;
+	color: #5faaf4;
+}
+.width9{
+	width: 90px !important;
+}
+/* 预约-患者报道*/
+.paddingright13px{
+	padding-right: 13px;
+}
+.res-patrep-pad5-15{
+	padding:5px 15px;
+}
+.res-patrep-alert{
+	background: #FFF2C6;
+	padding:0 15px;
+}
+.tab_box{
+	height: 51px;
+	position: relative;
+	top: 0;
+	width: 100%;
+}
+.weui_navbar_item_left{
+	float: left;
+	width: 50%;
+}
+.weui_navbar_item_right{
+	float: right;
+	width: 50%;
+}
+
+/* 我-家庭联系人*/
+.per_myfamily_zero{
+	width: 50%;
+	margin-right: auto;
+	margin-left: auto; 
+	margin-top: 53px;
+}
+.per-family-border-bottom{
+	border-bottom: solid 1px #ccc;
+}
+.per-family-list-left{
+	width: 60%;
+	text-align: left;
+	padding-left: 7px;
+}
+.per-family-list-right{
+	width: 40%;
+	text-align: center;
+}
+.per-family-width30{
+	width:30%;
+	display:inline-block;
+}
+.per-family-first{
+	background: rgb(92,117,146);
+	color: #fff;
+}
+.per-family-alert{
+	background: #efefef;
+	padding:3px 15px;
+	text-align: center;
+	color: #bbb;
+	border-bottom: solid 1px #ccc;
+}
+/* 修改家庭联系人 */
+.per-family-update-font-color{
+	font-size: 14px;
+	color:#3389DA;
+}
+.per_adduser_list > .weui_cell{
+	padding:12px 15px;
+}
+/* 我-我的收藏 */
+.per-collect-alert{
+	background: #ECECEC;
+	color:#aaa;
+	padding: 5px 15px;
+}
+.martop0{
+	margin-top: 0;
+}
+.fontsize14{
+	font-size: 14px;
+}
+/* 我-我的预约*/
+.per_mybooking_zero{
+	width: 103px;
+	margin-right: auto;
+	margin-left: auto; 
+	margin-top: 145px;
+}
+.per_booking_box_tit{
+}
+.bookint_tit_color{
+	color: #9c9b9b;
+	line-height: 45px;
+	height: 45px;
+}
+.per-booking-padtop10{
+	padding-top: 10px;
+}
+.per-booking-box{
+	margin:5px 10px;
+	padding:10px 5px;
+	border-radius:8px;
+}
+.per-booking-patient{
+	padding: 3px 10px;
+}
+
+.per-booking-0{
+	border-radius:5px;
+	border:solid 1px #fbc02d;
+	padding: 3px 5px;
+	color: #fbc02d;
+}
+
+.per-booking-1{
+	background: #9e9e9e;
+	border-radius:5px;
+	border:solid 1px #9e9e9e;
+	padding: 3px 5px;
+	color: #fff;
+}
+.per-booking-2{
+	background: #4dd0e1;
+	border-radius:5px;
+	border:solid 1px #4dd0e1;
+	padding: 3px 5px;
+	color: #fff;
+}
+.per-booking-3{
+	background: #e51c23;
+	border-radius:5px;
+	border:solid 1px #e51c23;
+	padding: 3px 5px;
+	color: #fff;
+}
+.per-booking-4{
+	background: #60A9F2;
+	border-radius:5px;
+	border:solid 1px #60A9F2;
+	padding: 3px 5px;
+	color: #fff;
+}
+.per-booking-5{
+	background: #aed581;
+	border-radius:5px;
+	border:solid 1px #aed581;
+	padding: 3px 5px;
+	color: #fff;
+}
+.per-booking-apl{
+	border-radius:5px;
+	border:solid 1px #fbc02d;
+	padding: 3px 5px;
+	color: #fbc02d;
+}
+
+/* 我-设置 */
+.about_img{
+	width: 65px;
+}
+.about_top_box{
+	margin-top: 130px;
+}
+.per-setup-logout{
+	margin:50% 15px 0 15px;
+}
+.martop15{
+	margin-top: 15%;
+}
+.flex2{
+	-webkit-box-flex: 2; 
+    -webkit-flex: 2; 
+    -ms-flex: 2;
+    flex: 2; 
+}
+.flex3{
+	-webkit-box-flex: 3; 
+    -webkit-flex: 3; 
+    -ms-flex: 3;
+    flex: 3; 
+}
+.colc5{
+	color: #c5c5c5;
+}
+.per-mz-text{
+	font-size: 13px;
+    line-height: 1.5;
+    text-indent: -1.5em;
+}
+.per-agree-text{
+	font-size: 13px;
+    line-height: 1.5;
+    text-indent: 0em;
+}
+.per-line-text{
+	font-size: 13px;
+    line-height: 1.5;
+}
+.bold{
+	font-weight: bold;
+}
+/* 我-账单 */
+.per_mypay_zero{
+	width: 124px;
+	margin-right: auto;
+	margin-left: auto; 
+	margin-top: 121px;
+}
+.per_mypay_nbox{
+	padding: 15px;
+}
+.per_mypay_docname{
+	margin-left: 15px;
+}
+.per_mypay_skill{
+	margin-left: 13px;
+}
+.weui_navbar_item.per_mypay_topnav{
+	background-color: #fff;
+}
+.weui_navbar.per_weui_navbar{
+  z-index: 99;
+}
+.weui_navbar.per_weui_navbar:after{
+  border-bottom: 0;
+}
+.weui_panel.res-hos-info:first-child{
+	margin-top: 15px;
+}
+.per-pay-box{
+	margin-top:12px;
+	margin-bottom:12px;
+	border-radius:15px;
+	margin-left: 12px;
+	margin-right: 12px;
+}
+.weui_panel.per-pay-box:before{
+	border-top-color: transparent;
+}
+.weui_panel.per-pay-box:after{
+	border-bottom-color: transparent;
+}
+.weui_panel.per-pay-box:first-child{
+	margin-top: 12px;
+}
+.marleft3{
+	margin-left: 3%;
+}
+.per-npay-gopay{
+	width: 55px;
+	display: inline-flex;
+	color: #fff;
+	border-radius:5px;
+	padding: 3px 5px 3px 8px;
+	margin-right: 6px;
+}
+.per-npay-gopaybg{
+	background-image: url(../personal/images/gopay.png);
+	background-size:contain;
+	background-repeat: no-repeat;
+}
+.per-npay-commentbg{
+	background: #9e9e9e;
+}
+.per-npay-overbg{
+	background: #9e9e9e;
+}
+.per-pay-martop-5{
+	margin-top: -5px;
+}
+/* 我- 未付账单详情 */
+.per_npay_for_box{
+	padding-left: 20px;
+}
+.per_npay_for_wx{
+	display: inline-block;
+	margin-left: 21px;
+}
+.per_npay_box{
+	padding-left: 27px;
+	padding-right: 27px; 
+}
+.width4{
+	width:40px;
+}
+
+.bordernone{
+	border-style: none;
+	border-color: transparent;
+}
+.per_mypay_box_padding{
+	padding-left: 15px;
+}
+.width5{
+	width:50px;
+}
+.per-width90{
+	width:90%;
+}
+#per-npay-info-spanmarrig10 span{
+	display: inline-block;
+	margin-right:10px;
+}
+.bmargin100{
+	margin-bottom: 100px;
+}
+.per-npay-buttom{
+	position: fixed;
+    bottom: 0px;
+    padding-bottom: 20px;
+    padding-top: 10px;
+    width: 100%;
+    height: 50px;
+    background: #fff;
+    border-top:1px solid #eee;
+}
+.per-npay-btn-img{
+	margin:0 17px;
+}
+.marright10px{
+	margin-right: 10px;
+}
+.padbot0{
+	padding-bottom: 0
+}
+.per-npay-info-span{
+	overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+	display: inline-block;
+	width:50%
+}
+.per-npay-info-time{
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+}
+.per-npay-pay-info{
+	padding: 7px 0 6px 10px;
+	color:#aaa
+}
+.per-npay-pay-cancelpay{
+	margin:9px;
+	border:solid 1px #5faaf4;
+	color:#5faaf4;
+}
+.per-npay-pay-gopay{
+	margin:9px;
+}
+.per_npay_info_paddingcell{
+	padding:8px;
+}
+.per_npay_ifno_hosname{
+	margin:8px auto 8px auto;
+}
+.weui_panel.no-border:before{
+	border-top:transparent;
+}
+.weui_panel.no-border:after{
+	border-bottom:transparent;
+}
+/*  我-已付账单详情*/
+#per-rpay-info-spanmarrig10 span{
+	display: inline-block;
+	margin-right:10px;
+}
+/* 我-家庭病例管理*/
+.per-width20{
+	width:20%;
+}
+.round{
+	width: 30px;
+    font-size: 20px;
+    line-height: 10px;
+    text-align: center;
+    color: #f00;
+    text-decoration: none;
+}
+.round1{
+	width: 30px;
+    font-size: 20px;
+    line-height: 16px;
+    text-align: center;
+    color: #f00;
+    text-decoration: none;
+}
+.weui_cell.bordernone:before{
+	border-style: none;
+}
+.weui_cells.bordernone:after{
+	border-style: none;
+}
+.weui_cells.bordernone:before{
+	border-style: none;
+}
+.padding015{
+	padding: 0 15px;
+}
+.per-case-info-num{
+	background: #eee;
+	position: fixed;
+	top:0;
+	z-index:99;
+	width: 100%;
+}
+.per-case-info-list-fir{
+	margin-top: 25px;
+	margin-left: 15px;
+}
+/* 我-首页 */
+.per_index_goHos_img{
+	width: 14px;
+	margin-left: 7px;
+	vertical-align: middle;
+}
+.per-index-lines{
+	height: 1px;
+	width: auto;
+	margin:0 15px;
+	background: #DFDFE1;
+}
+.weui_media_box.sec_box:before:{
+	border-top: transparent;
+}
+.borderleft{
+	border-left: solid 1px #DFDFE1; 
+}
+.borderright{
+	border-right: solid 1px #DFDFE1; 
+}
+.borderbottom{
+	border-bottom: solid 1px #DFDFE1; 
+}
+.noborder:before{
+	border:none;
+}
+.noborder:after{
+	border:none;
+}
+.overflowhidden{
+	overflow: hidden;
+	width: 100%;
+}
+.per-index-lunbo{
+	width: 500%;
+	position: relative; 
+	left: -200%;
+}
+.per-index-img{
+	width: 20%;
+	float: left
+}
+.per-index-pad8-5{
+	padding: 8px 15px;
+}
+.paddingleft5px{
+	padding-left: 5px;
+}
+.width100{
+	width: 100% !important;
+}
+.width25{
+	width:25%;
+}
+.width50{
+	width:50%;
+}
+.width40{
+	width:44%;
+}
+.width60{
+	width:56%;
+}
+.height40px{
+	height: 40px;
+}
+.height143px{
+	height: 143px;
+}
+.per-index-line{
+	height: 1px;
+	background: #d9d9d9;
+	margin: 13px 0;
+}
+#b03 { width: 100%;position: relative;}
+#b03 .dots { position: absolute; left: 50%; bottom: 0;margin-left: -55px;}
+#b03 .dots li 
+{ 
+	display: inline-block; 
+	width: 5px; 
+	height: 5px; 
+	margin: 0 4px; 
+	text-indent: -999em; 
+	border: 2px solid #fff; 
+	border-radius: 6px; 
+	cursor: pointer; 
+	opacity: .4; 
+	-webkit-transition: background .5s, opacity .5s; 
+	-moz-transition: background .5s, opacity .5s; 
+	transition: background .5s, opacity .5s;
+}
+#b03 .dots li.active 
+{
+	background: #fff;
+	opacity: 1;
+}
+.weui_grid.per-index-click-none:active{background-color:#fff}
+.per-index-click:active{background-color:#e4e4e4}
+.per_index_padding{
+	padding:7px 15px;
+}
+.per_index_fixed{
+	position: fixed;
+	bottom: 50px;
+}
+@media (max-width: 767px) {
+	.per_index_lbox > .weui_media_box  {
+		padding:10px 15px;
+	}
+	.per_index_rbox > .weui_media_box  {
+		padding:10px 15px 10px 30px;
+	}
+	.per_index_rbox > .weui_media_box:before  {
+		border-top:1px solid transparent;
+	}
+}
+@media (max-width: 374px) {
+	.per_index_lbox > .weui_media_box  {
+		padding:13px 10px;
+	}
+	.per_index_rbox > .weui_media_box  {
+		padding:13px 10px 13px 10px;
+	}
+	.per_index_rbox > .weui_media_box:before  {
+		border-top:1px solid transparent;
+	}
+}
+.weui_media_box.weui_media_appmsg .weui_media_appmsg_thumb.per_index_rimg{
+	max-width:48px;
+}
+.weui_media_box.weui_media_appmsg .weui_media_appmsg_thumb.per_index_limg{
+	max-width:67px;
+}
+/*预约-医院评价*/
+.weui_panel.martop0:first-child{
+	margin-top:0;
+}
+.padding0{
+	padding: 0;
+}
+.padding5-15{
+	padding: 5px 15px
+}
+.paddingtop5{
+	padding-top:5px;
+}
+.coloraaa{
+	color: #aaa;
+}
+.width30{
+	width: 30%;
+}
+.display-inline-block{
+	display: inline-block
+}
+.display-overflow-space{
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space:nowrap;
+}
+/* 预约-医院详情*/
+.res_hosInfo_box{
+	width: 50%;
+}
+.backgroundfff{
+	background:#fff;
+}
+.overflowhidden{
+	overflow: hidden;
+	width: 100%;
+}
+.res-hos-info-brief{
+	line-height: 1.2;
+	display: block;
+}
+.pic-group {
+    overflow: hidden;
+}
+.pic-group .btn-file {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+.pic-group .btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .01;
+    filter: alpha(opacity=1);
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* 医生详情 */
+.res_det_bottom_a{
+	border-right: 1px solid #d6d6d6;
+	padding: 0px;
+}
+.res-paddingright8px{
+	padding-right: 8px; 
+}
+.res-paddingleft5px{
+	padding-left: 5px;
+}
+.weui_media_desc.res-det-fontsize14{
+	font-size: 14px;
+}
+
+.listItems{
+	overflow-y: hidden;
+}
+
+.weui_navbar_bug{
+	display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    position: relative;
+    z-index: 500;
+    top: 0;
+    width: 100%;
+    background-color: #fff;
+}
+
+.ddd{
+	height: auto;
+}
+
+/* 404页面 */
+.msg_404{
+	padding-top: 25%;
+}
+.img_404{
+	width: 90%;
+	max-width: 417px; 
+}
+
+.weui_icon_checkedyes:before{display:block;content:'\EA08';color:#09bb07;font-size:16px}
+
+
+/* reversation_hos_info */
+.reservation_hos_info{
+	background-color: #fff;
+}
+.reservation_hos_info .midchtext {
+  width: 2rem;
+  text-align: center;
+  margin: 0 auto;
+  height: 0.64rem;
+  line-height: 0.64rem;
+}
+.reservation_hos_info .colorblue { 
+  /* border-bottom: 2px solid #6dacea; */
+  color: #6dacea;
+}
+.reservation_hos_info .colorgray {
+  border-bottom:none;
+  color: #9b9fa4;
+}
+.reservation_hos_info .gray {
+  color: #9b9fa4;
+}
+.reservation_hos_info .white {
+  color: #fff;
+}
+.reservation_hos_info .button {
+  height: 0.33rem;
+  line-height: 0.33rem;
+  width: 0.67rem !important;
+  background-color: #79baf4;
+  border-radius: 5px;
+  text-align: center;
+}
+.reservation_hos_info .gray12  {
+	background-color: #f2f2f2;
+ 	height: .17rem;
+ 	width: 100%;
+}
+.reservation_hos_info .midch  {
+  display: inline-block;
+  width: 50%;
+}
+.reservation_hos_info .midchv  {
+  display: inline-block;
+  vertical-align: middle;
+}
+.reservation_hos_info .w80 {
+	width: 80%;
+}
+.reservation_hos_info .w82 {
+	width: 82%;
+}
+.reservation_hos_info .w85 {
+	width: 85%;
+}
+.reservation_hos_info .w20 {
+	width: 20%;
+}
+.reservation_hos_info .w15 {
+	width: 15%;
+}
+.reservation_hos_info .size14{
+	font-size: .2rem;
+}
+.reservation_hos_info .margin02{
+	margin: .114rem 0.214rem;
+}
+.reservation_hos_info .margin016{
+	margin: .114rem 0.214rem;
+}
+.reservation_hos_info .gray1{
+	background-color: #f2f2f2;
+ 	height: 1px;
+ 	width: 100%;
+ 	margin:0 auto;
+}
+.reservation_hos_info .line2right{
+	margin: 0 0 0 5%;
+	width: 95%;
+}
+.reservation_hos_info{
+	font-size: .2286rem;
+	font-weight: 300;
+}
+/* reservation_hos.html */
+.reservation_hos {
+	font-weight: 300;
+}
+.weui_search_outer.res_search_box{
+	height: .528rem;
+	line-height: .48rem;
+}
+.width20.pointer{
+	line-height: .52rem;
+}
+.wx_avatar_img{
+    width: 1.214rem;
+    height: .914rem;
+}
+.weui_search_bar.res_hos_padding{
+	padding-top: .124rem;
+	padding-right:.1428rem;
+	padding-bottom: .104rem;
+	padding-left:.1428rem;
+	border-bottom: 1px solid #e9e9e9;
+	background-color: white;
+}
+.weui_search_text{
+	background-color: #eee;
+	text-align: left;
+	color:#b0b0b0;
+}
+.res-hos-concolor{
+	color:#b0b0b0;
+}
+.reservation_hos .weui_search_outer.res_search_box{
+	border-radius: 5px;
+}
+.reservation_hos .weui_search_text{
+	border-radius: 5px;
+} 
+.reservation_hos .weui_search_outer:after{
+	border-radius: 50px;
+}
+.reservation_hos .search_top{
+	width: 17px;
+    margin-top: -3px;
+    margin-right: 30px;
+    margin-left: 30px;
+}
+.city-select-box{
+	background-color: #fff;
+	height: 9.6rem;
+}
+.city-select-box .inlineb{
+	display: inline-block;
+}
+.city-select-box .boxpadding{
+	padding: .3rem .1514rem;
+}
+.city-select-box .circle-text{
+	width: 1.698rem;
+    height: 2.564rem;
+	display: inline-block;
+}
+.city-select-box .circle{
+	width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    padding: .182rem;
+}
+.city-select-box .text{
+	width: 1.25rem;
+    padding: .05rem .182rem;
+    text-align: center;
+    font-size: 0.24285rem;
+    font-weight: 300;
+}
+.reservation_hos_info .blueanim  {
+	background-color: #6dacea;
+ 	height: 2px;
+ 	width: 1.9838rem;
+ 	margin-left:.347rem;
+}
+@keyframes move2r
+{
+from {left:0;}
+to {left:2.714rem;}
+}
+@-webkit-keyframes move2r 
+{
+from {left:0;}
+to {left:2.714rem;}
+}
+@keyframes move2l
+{
+from {left:2.714rem;}
+to {left:0;}
+}
+@-webkit-keyframes move2l
+{
+from {left:2.714rem;}
+to {left:0;}
+}
+.move2right
+{
+	position:relative;
+	animation:move2r 1s;
+	-webkit-animation:move2r 1s; 
+	animation-fill-mode : forwards;
+	-webkit-animation-fill-mode: forwards;
+}
+.move2left
+{
+	position:relative;
+	animation:move2l 1s;
+	-webkit-animation:move2l 1s; 
+	animation-fill-mode : forwards;
+	-webkit-animation-fill-mode: forwards;
+}
+
+.doc-list-box .weui_media_box .res-doc-con-text{
+	width: 2.8rem;
+	line-height: .2143rem;
+	margin-top: -5px;
+}
+.doc-list-box .weui_btn.weui_btn_mini{
+	width: .671rem;
+	height: .3285rem;
+	line-height: .3285rem;
+    margin: 0 auto;
+    padding: 0;
+    background-color: #02D8CB;
+    color:#fff;    
+    position: absolute;
+    top: .32rem;
+    right: 0;
+    border:none;
+}
+.doc-list-box .res-doc-hosbtn{
+	background-image: none
+}
+.doc-list-box .weui_media_box.weui_media_appmsg .weui_media_bd{
+	position: relative;
+	/* height:1.17rem; */
+}
+.doc-list-box .res-doc-con{
+	margin-top:.0714rem;	
+	line-height: .208rem !important;
+}
+.doc-list-box .weui_media_box .weui_media_desc{
+	font-size: .1857rem;
+}
+.doc-list-box .weui_media_box .weui_media_title{
+	font-size: .2429rem;
+}
+.doc-list-box .doctor .res-doc-name{
+	width:1.1429rem;
+	font-size: .2rem;
+	font-weight: 400;
+}
+.doc-list-box .weui_media_title.res-doc-name.pull-left{
+	font-size: .2429rem;	
+}
+.doc-list-box .weui_media_box{
+	padding: .08rem .214rem;
+}
+.doc-list-box .weui_media_hd.width_auto.rmargin15{
+	margin-right:.2142rem !important;
+}

@@ -1,0 +1,120 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+	serviceurl,
+	reminder,
+	getHtmlFontSize,
+	checkMobile
+} from '../../js/common.js';
+
+import {
+	SearchHidden
+} from '../../js/components/searchList.js';
+
+const phoneNum = "01064328838";
+$(document).ready(function() {
+	getHtmlFontSize();
+})
+
+var Box = React.createClass({
+	getInitialState: function() {
+		return {
+			name: '',
+			mobile: '',
+			work_unit: '',
+			position: '',
+			gender: '1',
+			email: ''
+		}
+	},
+	render: function() {
+		var callnum = "tel:" + phoneNum;
+		return (
+			<div className="invite"> 
+				<form>
+						<div className="form-group" style={{paddingTop: "1.8rem"}}>
+							<input type="text" className="form-control formcon height58 inline glyphicon-phone" ref="name" placeholder="姓名，必填" /><span className="require"></span>
+							<input type="text" className="form-control formcon height58 inline" ref="mobile" placeholder="手机号，必填" onChange={this.mobileChange} /><span ref="imobile" className="require"></span>
+							<input type="text" className="form-control formcon height58 inline" ref="work_unit" placeholder="工作单位" />
+							<input type="text" className="form-control formcon height58 inline" ref="position" placeholder="职位" />
+							<input type="text" className="form-control formcon height58 inline" ref="email" placeholder="邮箱" />
+							<div className="formcon"  style={{display:"none"}}>
+								<RadioButtons ref="gender" handleRadio={this.handleRadio} />
+							</div>
+							<input type='button' className="btn btn-lg formcon height65 brown" onClick={this.handleSubmit} value="接受邀请" />
+							 <a href={callnum} className="btn btn-mobile btn-lg btn-block formcon height65 glyphicon glyphicon glyphicon-earphone" >
+					          <span style={{paddingLeft:".1rem"}}>010-64328838</span>
+					        </a>
+						</div>
+				</form>
+		        <SearchHidden toastText="正在查询" />
+			</div>
+		);
+	},
+	handleSubmit: function() {
+		var data = {
+			"name": this.refs.name.value,
+			"mobile": this.refs.mobile.value,
+			"work_unit": this.refs.work_unit.value,
+			"gender": this.state.gender,
+			"position": this.refs.position.value,
+			"email": this.refs.email.value
+		}
+		if (!(this.refs.name.value)) {
+			reminder("请填写姓名")
+			return;
+		}
+		if (!checkMobile(this.refs.mobile.value)) {
+			reminder("请填写正确手机号")
+			return;
+		}
+
+		$.ajax({
+			url: serviceurl + "survey/insert",
+			type: 'POST',
+			dataType: "json",
+			contentType: "application/json",
+			data: JSON.stringify(data),
+			success: function(result) {
+				var msg = result.message;
+				if (msg.indexOf("重复") > -1) {
+					reminder("此嘉宾已经存在,不需要重复邀请")
+					console.log(msg);
+				} else {
+					reminder(msg);
+				}
+			},
+			error: function(XMLHttpRequest) {
+				reminder(XMLHttpRequest.responseJSON.message);
+				return;
+			}
+		})
+	},
+	handleRadio: function(e) {
+		this.setState({
+			gender: e.target.value
+		})
+	},
+	mobileChange: function(e) {
+		if (!checkMobile(e.target.value)) {
+			this.refs.imobile.className = "requiren"
+		} else {
+			this.refs.imobile.className = "required"
+		}
+	}
+});
+var RadioButtons = React.createClass({
+	render: function() {
+		return (
+			<span>
+				<span style={{width:"30%",display:"inline-block"}}>男<input className="" onChange={this.props.handleRadio} name="gender" type="radio" defaultChecked value="1"/></span>
+				<span style={{width:"30%",display:"inline-block"}}>女<input onChange={this.props.handleRadio} name="gender" type="radio" value="-1"/></span>
+			</span>
+		)
+	}
+});
+ReactDOM.render(
+	<Box />,
+	document.getElementById('content')
+);

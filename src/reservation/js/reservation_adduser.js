@@ -1,0 +1,401 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	serviceurl,
+	ipurl,
+	setCookie,
+	getCookie,
+	delCookie,
+	reminder,
+	reminderSuccess,
+	getURLparam,
+	getHtmlFontSize
+} from '../../js/common.js';
+import Vld from 'validator';
+import {
+	SearchHidden
+} from '../../js/components/searchList';
+
+getHtmlFontSize();
+var Fullname = "";
+var Mobile = "";
+var thisURL = "patient/add";
+var gender = "0";
+var relation = "";
+var Idcard = "";
+
+var isNonage = false;//是否为未成年关系
+var birthday = "";
+var gdname = "";
+var gdcard = "";
+var gdmobile = "";
+
+var default_patient = "0";//默认为非默认联系人
+
+$(document).ready(function() {
+	//判断登陆与否
+	$.ajax({
+		url: serviceurl + "site/getUserInfo",
+		type: "get",
+		dataType: "json",
+		contentType: "application/json",
+		cache: false,
+		async: false,
+		beforeSend: function(XMLHttpRequest) {},
+		success: function(dt) {
+			if (dt.status == "redirect") {
+				//表示未登录
+				location.href = "../login.html?backurl=reservation/reservation_adduser.html";
+			}
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			reminder(XMLHttpRequest.responseJSON.message);
+			return;
+		}
+	});
+});
+
+var Reservation_addUserInfo = React.createClass({
+	componentDidMount: function() {
+		$("#relationship").attr("readonly","readonly");
+		$("#gender").attr("readonly","readonly");
+		
+		$("#clickRelationship").click(function(){
+			$(".mask").css("display","block");
+			$(".actionsheet").addClass("weui_actionsheet_toggle");
+			$("#res_adduser_select_box").removeClass("displaynone");
+			$("#addUser_relationship").removeClass("displaynone");
+		});
+
+		$("#clicksex").click(function(){
+			$(".mask").css("display","block");
+			$(".actionsheet").addClass("weui_actionsheet_toggle");
+			$("#res_adduser_select_box").removeClass("displaynone");
+			$("#addUser_sex").removeClass("displaynone");
+		});
+		$("#forcb2").attr("for","cb2");
+	},
+	saveClick: function() {
+		Fullname = this.refs.fullname.value;
+		Idcard = this.refs.Idcard.value;
+		Mobile = this.refs.mobile.value;
+
+		isNonage = relation=="5"?true:false;//是否为未成年关系
+		birthday = this.refs.birthday.value;
+		gdname = this.refs.gdname.value;
+		gdcard = this.refs.gdcard.value;
+		gdmobile = this.refs.gdmobile.value;
+
+		default_patient = $("#cb2").is(':checked')?"1":"0";//默认为非默认联系人
+
+
+		if (Vld.isNull(Fullname)){
+			reminder("请输入姓名");
+			return;
+		}
+		if (Vld.isLength(Fullname + "", {
+				min: 1,
+				max: 6
+			}) === false) {
+			reminder("姓名最多为6个字");
+			return;
+		}
+		if(isNonage){
+			if (Vld.isNull(gdname)){
+				reminder("请输入监护人姓名");
+				return;
+			}
+			if (Vld.isLength(gdname + "", {
+					min: 1,
+					max: 6
+				}) === false) {
+				reminder("监护人姓名最多为6个字");
+				return;
+			}
+			if (Vld.isNull(gdcard + "")) {
+				reminder("请输入监护人身份证号");
+				return;
+			}
+			if (Vld.isLength(gdcard + "", {min: 15,max: 15}) || Vld.isLength(gdcard + "", {min: 18,max: 18}) === false) {
+				reminder("监护人身份证号应为15位或者18位");
+				return;
+			}
+			if (Vld.isAlphanumeric(gdcard + "", 'en-US') === false) {
+				reminder("请输入正确的监护人身份证号");
+				return;
+			}
+			if (Vld.isMobilePhone(gdmobile, 'zh-CN') === false) {
+				reminder("请输入正确监护人手机号!");
+				return false;
+			}
+			if (!Vld.isNull(Idcard + "")) {
+				if (Vld.isAlphanumeric(Idcard + "", 'en-US') === false) {
+					reminder("请输入正确的身份证号");
+					return;
+				}
+				if (Vld.isLength(Idcard + "", {min: 15,max: 15}) || Vld.isLength(Idcard + "", {min: 18,max: 18}) === false) {
+					reminder("身份证号应为15位或者18位");
+					return;
+				}
+			}
+		}else{
+			if (Vld.isNull(Idcard + "")) {
+				reminder("请输入身份证号");
+				return;
+			}
+			if (Vld.isLength(Idcard + "", {min: 15,max: 15}) || Vld.isLength(Idcard + "", {min: 18,max: 18}) === false) {
+				reminder("身份证号应为15位或者18位");
+				return;
+			}
+			if (Vld.isAlphanumeric(Idcard + "", 'en-US') === false) {
+				reminder("请输入正确的身份证号");
+				return;
+			}
+			if (Vld.isMobilePhone(Mobile, 'zh-CN') === false) {
+				reminder("请输入正确手机号!");
+				return false;
+			}	
+		}
+
+		var _params={
+			"fullname" : Fullname ,
+			"idcard" : Idcard ,
+			"mobile" : Mobile ,
+			"relation" : relation ,
+
+			"gdname" : gdname ,
+			"gdcard" : gdcard ,
+			"gdmobile" : gdmobile ,
+			"gender" : gender ,
+			"birthday" : birthday ,
+
+			"default_patient" : default_patient
+		};
+		$.ajax({
+			url: serviceurl + thisURL, 
+			type: "post", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			data: JSON.stringify(_params),
+			contentType: "application/json", //内容类型
+			cache: false,
+			beforeSend: function(XMLHttpRequest) {
+				$("#loading-toast").css("display", "block");
+			}, 
+			success: function(data) {
+				$("#loading-toast").css("display", "none");
+				if (data.status == "success") {
+					reminderSuccess("添加成功!", "../personal/per_family.html");
+					// reminder("添加成功!");
+				} else if (data.status == "fail") {
+					reminder("添加失败!");
+					return;
+				} else {
+					reminder(data.message);
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				$("#loading-toast").css("display", "none");
+				reminder(XMLHttpRequest.responseJSON.message);
+				return;
+			}
+		});
+	},
+	render: function() {
+		return (
+			<div>
+		        <div className="weui_cells weui_cells_form weui_cells_access per_adduser_weui_cells clance_border">
+		        	<div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">关系</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd" id="clickRelationship">
+		                    <input ref="relationship" id="relationship" name="relationship" className="weui_input text-right pointer" type="text" placeholder="请选择与本人关系" />
+						</div>
+		                <div className="weui_cell_ft"></div>
+		            </div>
+				</div>
+
+				<div className="weui_cells weui_cells_form weui_cells_access per_adduser_weui_cells clance_border">
+		            <div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">姓名</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+		                    <input ref="fullname" id="fullname" name="fullname" className="weui_input text-right pointer" type="text" placeholder="请输入真实姓名" />
+		                </div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+		            </div>
+		            <div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">身份证</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+		                    <input  ref="Idcard" id="Idcard" name="Idcard" id="Idcard" className="weui_input text-right pointer" type="text" placeholder="请输入真实身份证号" onBlur={this.GetBirthdatByIdNo} />
+		                </div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+		            </div> 
+					<div className="weui_cell per_adduser_weui_cell clance_border" id="mobileArea">
+						<div className="weui_cell_hd">手机号</div>
+						<div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+							<input className="weui_input text-right pointer" ref="mobile" id="mobile" name="mobile" type="number" pattern="[0-9]*" placeholder="用于短信(电话)通知 请慎重填写" />
+						</div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+					</div>
+
+					<div className="weui_cell per_adduser_weui_cell clance_border displaynone fArea">
+						<div className="weui_cell_hd">出生日期</div>
+						<div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd" >
+							<input  ref="birthday" id="birthday" className="weui_input text-right pointer per_adduser_input" name="birthday" type="date" placeholder="请选择" />
+							</div>
+						<div className="weui_cell_ft"></div>
+					</div>
+					<div className="weui_cell per_adduser_weui_cell clance_border displaynone fArea" id="clicksex">
+						<div className="weui_cell_hd">性别</div>
+						<div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+							<input  ref="gender" id="gender" name="gender" className="weui_input text-right pointer" type="text"  disabled="disabled" placeholder="请选择" value=""/>
+						</div>
+						<div className="weui_cell_ft"></div>
+					</div>
+		        </div>
+		            
+		        <div className="weui_cells weui_cells_form weui_cells_access per_adduser_weui_cells clance_border displaynone" id="gdArea">  
+		        	<div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">监护人姓名</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+		                    <input ref="gdname" id="gdname" name="gdname" className="weui_input text-right pointer" type="text" placeholder="请输入真实姓名" />
+		                </div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+		            </div>
+
+		            <div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">身份证</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+		                    <input  ref="gdcard" id="gdcard" name="gdcard" className="weui_input text-right pointer" type="text" placeholder="请输入真实身份证号" onBlur={this.GetBirthdatByIdNo} />
+		                </div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+		            </div>
+ 
+					<div className="weui_cell per_adduser_weui_cell clance_border">
+						<div className="weui_cell_hd">手机号</div>
+						<div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+							<input className="weui_input text-right pointer" ref="gdmobile" id="gdmobile" name="gdmobile" type="number" pattern="[0-9]*" placeholder="用于短信(电话)通知 请慎重填写" />
+						</div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+					</div>
+		        </div>
+
+				<div className="weui_cells weui_cells_form weui_cells_access per_adduser_weui_cells clance_border"> 
+		            <div className="weui_cell per_adduser_weui_cell clance_border">
+		                <div className="weui_cell_hd">设为默认就诊人</div>
+		                <div className="weui_cell_bd weui_cell_primary per_adduser_cell_bd">
+		                    <li className="res_adduser_switch">
+							  	<input className="tgl tgl-ios" id="cb2" type="checkbox" />
+    							<label className="tgl-btn" id="forcb2" ></label>
+							</li>
+		                </div>
+		                <div className="weui_cell_ft per_adduser_cell_ft"></div>
+		            </div>		            
+		        </div> 
+
+				<div className="datedet_btn_box">
+					<div className="weui_btn weui_btn_primary success_btn" ref="res-adduser-btn" onClick={this.saveClick}>保存</div>
+				</div>
+				<SearchHidden toastText="正在查询" />
+			</div>
+		);
+	}
+});
+
+var Reservation_Relationship = React.createClass({
+	componentDidMount: function(){
+		$(".res_adduser_relationship").click(function(){
+			relation = $(this).attr("name");
+			if(relation=="5"){
+				//展开监护人属性
+				$(".fArea").css("display","flex");
+				$("#gdArea").show();
+				$("#mobileArea").hide();
+			}else{
+				//收起监护人属性,并清空监护人的属性值
+				$(".fArea").hide();
+				$("#gdArea").hide();
+				$("#mobileArea").show();
+				$("#birthday").val("");
+				$("#gender").val("");
+				$("#gdname").val("");
+				$("#gdcard").val("");
+				$("#gdmobile").val("");
+				birthday = "";
+				gender = "";
+				gdname = "";
+				gdcard = "";
+				gdmobile = "";
+			}
+			$("#relationship").val($(this).text());
+			hiddenTuCeng();
+		});
+		$(".res_adduser_sex").click(function(){
+			gender = $(this).attr("name");
+			$("#gender").val($(this).text());
+			hiddenTuCeng();
+		});
+	},
+	click_mask: function(){
+		hiddenTuCeng();
+	},
+	cancel: function(){
+		$(".mask").css("display","none");
+		$(".actionsheet").removeClass("weui_actionsheet_toggle");
+		$(".weui_actionsheet_menu").addClass("displaynone");
+	},
+	render: function() {
+		return (
+			<div id="res_adduser_select_box">
+		        <div className="weui_mask_transition mask" onClick={this.click_mask}></div>
+		        <div className="weui_actionsheet actionsheet">
+		            
+		            <div className="weui_actionsheet_menu displaynone" id="addUser_relationship">
+		                <div className="weui_actionsheet_cell res-datedet-stopclick pointer">请选择与本人关系</div>
+		                <div id="addUser_relationship_list">
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="1">本人</div>
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="2">父母</div>
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="3">夫妻</div>
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="4">子女（成年）</div>
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="5">子女（未成年）</div>
+		                    <div className="weui_actionsheet_cell res_adduser_relationship pointer" name="6">其它</div>
+		                </div>
+		            </div>
+
+					<div className="weui_actionsheet_menu displaynone" id="addUser_sex">
+		                <div className="weui_actionsheet_cell res-datedet-stopclick pointer">选择性别</div>
+		                <div id="addUser_sex_list">
+		                    <div className="weui_actionsheet_cell res_adduser_sex pointer" name="1">男</div>
+		                    <div className="weui_actionsheet_cell res_adduser_sex pointer" name="-1">女</div>
+		                </div>
+		            </div>
+
+		            <div className="weui_actionsheet_action actionsheet_cancel" onClick={this.cancel}>
+		                <div className="weui_actionsheet_cell pointer">取消</div>
+		            </div>
+		        </div>
+		    </div>
+		);
+	}
+});	
+
+var hiddenTuCeng = function(){
+	$(".mask").css("display","none");
+	$(".actionsheet").removeClass("weui_actionsheet_toggle");
+	$(".weui_actionsheet_menu").addClass("displaynone");
+};
+var Reservation_addUserBox = React.createClass({
+	render: function() {
+		return (
+			<div>
+				<Reservation_addUserInfo />
+				<Reservation_Relationship />
+			</div>
+		);
+	}
+});
+ReactDOM.render(
+	<Reservation_addUserBox />,
+	document.getElementById('content')
+);

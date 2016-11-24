@@ -1,0 +1,320 @@
+﻿'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	thisurl,
+	serviceurl,
+	ipurl,
+	downDistance,
+	setCookie,
+	getCookie,
+	delCookie,
+	getURLPram,
+	clearCookies,
+	getCityIDByName,
+	reminder,
+	reminderSuccess,
+	getLocalTime,
+	checknull,
+	MoneyConversion,
+	MoneyValue,
+	toDecimal,
+	getMobilTime,
+	plusZero,
+	getURLparam,
+	getHtmlFontSize,
+	btnSetash,
+	btnSetBack
+} from '../js/common.js';
+import Vld from 'validator';
+
+getHtmlFontSize();
+var Mobile = "";
+var checkMobile = function(account){
+	if( Vld.isMobilePhone(account, 'zh-CN') === false ){
+		reminder("请输入11位手机号!");
+		return false;
+	}
+	return true;
+}; 
+
+var LoginBox = React.createClass({
+  render: function() {
+    return (
+		<LoginForm />
+    );
+  }
+});
+
+//验证码发送
+var GetCaptcha = function(account){
+	  var Mobile = account;
+	  var btn = $("#securityCode").text();
+		// reminderSuccess("验证码已发送","");
+		// TimeSet(59);
+	  if( checkMobile(Mobile) == true ){
+	    $.ajax({	  
+			url : thisurl+"getCaptcha",   	 //请求的Url
+			type : "get",                                           //提交方式
+			dataType : "json",                                       //请求的返回类型 这里为json	
+			data : { "mobile" : Mobile },
+			contentType : "application/json",        			     //内容类型
+			cache : false,  
+			beforeSend:function(XMLHttpRequest){
+				$("#loading-toast").css("display","block");
+				$("#loading-toast-text").text("正在发送验证码")
+			},
+			success : function(data){
+				console.log(JSON.stringify(data));
+				$("#loading-toast").css("display","none");
+				if( data.status == "success"){
+						//验证码发送成功
+						reminderSuccess("验证码已发送","");
+						TimeSet(59);
+						return true;
+					}else{
+						reminder("验证码发送失败");
+						btnSetBack("securityCode","#5faaf4");
+						return false;
+					}
+				},
+			complete:function(XMLHttpRequest,textStatus) {},	
+			error: function (XMLHttpRequest, textStatus, errorThrown) {
+					//console.log("验证码发送失败！！！");
+					$("#loading-toast").css("display","none");
+					btnSetBack("securityCode","#5faaf4");
+					reminder(XMLHttpRequest.responseJSON.message);
+					return false;
+				}
+ 		});
+	  }else{
+	  		reminder("请输入正确的手机号!");
+			return false;  
+	  }
+};
+
+//检测手机号 按钮倒计时
+var TimeSet = function(intDiff){
+	var timer = window.setInterval(function(){
+		var day=0,
+		hour=0,
+		minute=0,
+		second=0;//时间默认值	
+	if( intDiff > 0 ){	
+			day = Math.floor(intDiff / (60 * 60 * 24));
+			hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+			minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+			second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+			if (minute <= 9) minute = '0' + minute;
+		   if (second <= 9) second = '0' + second;
+			$("#securityCode").text(second+'s');
+			intDiff--;
+		}else if( intDiff == 0){
+			clearInterval(timer);
+			$("#securityCode").text("获取验证码");
+			btnSetBack("securityCode","#5faaf4");
+		}
+	}, 1000);
+};
+
+var LoginForm = React.createClass({
+  getInitialState: function() {
+    return {account: '', text: ''};
+  },
+  componentDidMount: function(){
+	var mobileNum = getCookie("mobileNum");
+	$("#account").val(mobileNum);
+  },
+  subOnClick:function(e){
+  	btnSetash("login_btn");
+  	//$("#login_btn").text("正在登录...");
+  	var account = this.refs.account.value.trim();
+   var captcha = this.refs.captcha.value.trim();
+
+   if(!checkMobile(account)){
+    	btnSetBack("login_btn","#5faaf4");
+    	return;
+   }
+	if( Vld.isNull(captcha+"")){
+		reminder("请输入验证码!");
+		btnSetBack("login_btn","#5faaf4");
+		return;
+	}
+	if( Vld.isLength(captcha+"", {min:4, max:4}) === false){
+		reminder("请输入4位验证码");
+		btnSetBack("login_btn","#5faaf4");
+		return;
+	}
+	$("#loading-toast").css("display","block");
+	$("#loading-toast-text").text("正在登录...")
+
+	//密码登录
+	// $.ajax({
+ //      url: thisurl+"userLogin",
+ //      dataType: 'json',
+	//   contentType:"application/json",
+ //      type: 'POST',
+ //      data: JSON.stringify({mobile:account, password:password, role:"1"}),
+ //      success: function(data) {
+	// 	delCookie("mobileNum");
+ //        setCookie("mobileNum", $("#account").val(), 30);
+	// 	$("#login-loading-toast").css("display","none");
+	// 	console.log(JSON.stringify(data));
+	// 	if(data.status == "success"){
+	// 		if(data.map.url == "default"){
+	// 			//登陆成功
+	//   			// history.go(-1);
+	//   			//清空cookie，跳转到牙艺首页
+	// 			clearCookies();
+	// 			setCookie("gobackURL", ipurl + "login.html", 30);
+	// 			location.href = "personal/per_index.html";
+	// 		}else{
+	// 			var urlinfo=window.location.href;                      //获取当前页面的url 
+	// 			var len=urlinfo.length;                                     //获取url的长度 
+	// 			var offset=urlinfo.indexOf("backurl=");                            //设置参数字符串开始的位置 
+	// 			var val = "";
+	// 			val = urlinfo.substr(offset+8,len);     
+	// 			if( Vld.isNull(val+"")){
+	// 				reminder(data.message);
+	// 			}else{
+	// 				location.href = val;
+	// 			}
+	// 		}
+	// 	}else{
+	// 		reminder(data.message);
+	// 		return;
+	// 	}
+ //      }.bind(this),
+ //      error: function(xhr, status, err) {
+ //      	//清除掉文本信息
+ //      	//this.refs.account.value = "";
+	// 	//this.refs.password.value = "";
+	// 	console.log("xhr.responseJSON:   " + xhr.responseJSON);
+	// 	reminder(xhr.responseJSON.message);
+ //      }.bind(this)
+ //    });
+	
+ 	//验证码登录
+	$.ajax({
+      url: thisurl+"captchaLogin",
+      dataType: 'json',
+	  	contentType:"application/json",
+      type: 'POST',
+      data: JSON.stringify({mobile:account, captcha:captcha , role:"1"}),
+      success: function(data) {
+			delCookie("mobileNum");
+        	setCookie("mobileNum", $("#account").val(), 30);
+			$("#loading-toast").css("display","none");
+			console.log(JSON.stringify(data));
+			if(data.status == "success"){
+				if(data.map.url == "default"){
+					//登陆成功
+		  			// history.go(-1);
+		  			//清空cookie，跳转到牙艺首页
+					clearCookies();
+					setCookie("gobackURL", ipurl + "login.html", 30);
+					location.href = "personal/per_index.html";
+				}else{
+					var urlinfo=window.location.href;                      //获取当前页面的url 
+					var len=urlinfo.length;                                     //获取url的长度 
+					var offset=urlinfo.indexOf("backurl=");                            //设置参数字符串开始的位置 
+					var val = "";
+					val = urlinfo.substr(offset+8,len);     
+					if( Vld.isNull(val+"")){
+						reminder(data.message);
+					}else{
+						location.href = val;
+					}
+				}
+			}else{
+				$("#loading-toast").css("display","none");
+				reminder(data.message);
+				btnSetBack("login_btn","#5faaf4");
+				return;
+			}
+      }.bind(this),
+      error: function(xhr, status, err) {
+      	$("#loading-toast").css("display","none");
+			reminder(xhr.responseJSON.message);
+			btnSetBack("login_btn","#5faaf4");
+			return;
+      }.bind(this)
+    });
+  },
+  getPriOnClick:function(e){
+  	btnSetash("securityCode");//获取验证码按钮置灰
+
+  	var account = $("#account").val().trim();
+   if(!checkMobile(account)){
+    	btnSetBack("securityCode","#5faaf4");
+    	return;
+   }else{
+    	GetCaptcha(account);
+   }
+  },
+	render: function() {
+		return (
+		<div>
+			<div className="weui_cells weui_cells_form login_wells_box clance_border">
+			   <div className="weui_cell login_well_name clance_border">
+			      <div className="weui_cell_bd weui_cell_primary clance_border">
+			        	<input type="mobile" className="weui_input login_input_name" id="account" ref="account" placeholder="手机号码" />
+			      </div>
+			      <div className="login_reg_btn text-align" id="securityCode" onClick={this.getPriOnClick}>获取验证码</div>
+			   </div>
+			   <div className="weui_cell login_well_code">
+			      <div className="weui_cell_bd weui_cell_primary">
+			        	<input type="number" className="weui_input login_input_code" id="captcha" ref="captcha" placeholder="短信验证码" />
+			      </div>
+			   </div>
+			</div>
+			
+			<div className="login_btn_box">
+				<a className="weui_btn weui_btn_primary reg-btn login_btn" id="login_btn" onClick={this.subOnClick}>登录</a>
+			</div>
+
+			<div className="login_protocol_box">
+				<div className="login_protocol_w">登录代表你已同意</div>
+				<div className="login_protocol_w2"><a href="agreement.html">《牙艺平台用户注册协议》</a></div>
+			</div>
+
+			<div id="loading-toast" ref="loading-toast" className="displaynone">
+				<div className="weui_mask_transparent"></div>
+				<div className="weui_toast_fail">
+					<p className="text-align" id="loading-toast-text"></p>
+				</div>
+			</div>
+
+			<div id="login-loading-toast" ref="login-loading-toast" className="displaynone">
+				<div className="weui_mask_transparent"></div>
+				<div className="weui_toast_fail">
+					<p className="text-align">正在登录</p>
+				</div>
+			</div>
+
+			<div id="success-toast" className="displaynone">
+			    <div className="weui_mask_transparent" id="success-toast-mask"></div>
+			    <div className="weui_toast">
+			        <i className="weui_icon_toast"></i>
+			        <p className="weui_toast_content text-align" id="success-toast-text"></p>
+			    </div>
+			</div>
+
+			<div id="fail-toast" className="displaynone">
+			    <div className="weui_mask_transparent" id="fail-toast-mask"></div>
+			    <div className="weui_toast_fail">
+			        <p className="text-align" id="fail-toast-text"></p>
+			    </div>
+			</div>
+		</div>
+
+		);
+	}
+});
+
+ReactDOM.render(
+	<LoginBox />,
+	document.getElementById('content')
+);
+

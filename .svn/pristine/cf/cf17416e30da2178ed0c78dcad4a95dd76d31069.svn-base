@@ -1,0 +1,108 @@
+'use strict';
+import React from 'react';
+import {
+	serviceurl,
+	setCookie,
+	getCookie,
+	delCookie,
+	protocol,
+	ipurl
+} from '../../js/common.js';
+
+var mockdata = [];
+var htmlUrl = ""; //设置要跳转的页面
+
+if (!mockdata || !(mockdata instanceof Object)) {
+	mockdata = [{
+		"id": 1,
+		"countycode": "hz",
+		"name": "杭州",
+		"avatar": "http://localhost/yayi/ya//hospital/getPic?path=/yayi/yaservice/imgs/hospitalpic/6228c0f0f3e23a7af7511f2f92509535.jpg"
+	}, {
+		"id": 2,
+		"countycode": "bj",
+		"name": "北京",
+		"avatar": "http://localhost/yayi/ya//hospital/getPic?path=/yayi/yaservice/imgs/hospitalpic//76c48d46-f56b-44fb-addb-70b06d73054f.jpg"
+	}, {
+		"id": 3,
+		"countycode": "bj",
+		"name": "天津",
+		"avatar": "http://localhost/yayi/ya//hospital/getPic?path=/yayi/yaservice/imgs/hospitalpic//76c48d46-f56b-44fb-addb-70b06d73054f.jpg"
+	}, {
+		"id": 4,
+		"countycode": "bj",
+		"name": "嘉兴",
+		"avatar": "http://localhost/yayi/ya//hospital/getPic?path=/yayi/yaservice/imgs/hospitalpic//76c48d46-f56b-44fb-addb-70b06d73054f.jpg"
+	}, {
+		"id": 5,
+		"countycode": "bj",
+		"name": "敬请期待",
+		"avatar": "http://localhost/yayi/ya//hospital/getPic?path=/yayi/yaservice/imgs/hospitalpic//76c48d46-f56b-44fb-addb-70b06d73054f.jpg"
+	}]
+}
+//跳转到下一页面
+var goNext = function(id, name) {
+	//设置参数到cookie内
+	delCookie("cityID");
+	setCookie("cityID", id, 30);
+	delCookie("cityName");
+	setCookie("cityName", name, 30);
+	//location.href = htmlUrl;
+	location.reload()
+};
+//获取前一页页面的url链接
+var getHtmlUrl = function() {
+	htmlUrl = protocol + getCookie("gobackURL");
+};
+getHtmlUrl();
+var CitySelectBox = React.createClass({
+	getInitialState: function() {
+		return {
+			count: 0,
+			mockdata: null
+		}
+	},
+	componentDidMount: function() {
+		this.serverRequest = $.get(serviceurl + "site/listOpenCity").done(function(data) {
+			this.setState({
+				mockdata: data.data
+			});
+		}.bind(this));
+	},
+	componentWillUnmount: function() {
+		this.serverRequest.abort();
+	},
+	handleClick(id, name) {
+		name = name.replace("市", "");
+		name = name.replace("敬请期待", "请选择");
+		goNext(id, name);
+	},
+	render: function() {
+		var that = this;
+		if (this.state.mockdata) {
+			var nodes = this.state.mockdata.map(function(comment) {
+				that.state.count++;
+				var imgsrc = serviceurl + comment.avatar;
+				return (
+					<div key={comment.id} className="inlineb">
+		            <div className="circle-text">
+		              <img className="circle" src= {imgsrc} onClick={that.handleClick.bind(that,comment.countycode,comment.name)} />
+		              <div className="text">{comment.name}</div>
+		            </div>
+         		</div>
+				);
+			});
+			return (
+				<div className="city-select-box">
+		          <div className="boxpadding">
+		          {nodes}
+		          </div>
+	      		</div>
+			);
+		}
+		return <div>正在加载...</div>;
+	}
+});
+export {
+	CitySelectBox
+};

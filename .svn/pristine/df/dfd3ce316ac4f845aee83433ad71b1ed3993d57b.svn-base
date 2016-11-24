@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>我的订单</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../css/pullrefresh.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+</head>
+
+<body>
+    <div class="per_billing per_billing_top" id="centContent">
+    </div>
+    <div class="per_billing_list">
+        <div id="per_npay_list" class="per_npay_list"></div>
+        <div id="per_rpay_list" class="displaynone per_rpay_list"></div>
+        <div id="personal_loading"></div>
+    </div>
+
+
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/per_mypay.js" charset="utf-8"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>我的医生</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="bd">
+            <div class="weui_tab">
+                <div class="tab_box" id="centContent">
+                    <div class="weui_navbar_item weui_navbar_item_right_border weui_navbar_item_left weui_bar_item_on per_mypay_topnav pointer" id="per-f">已报到</div>
+                    <div class="weui_navbar_item per_mypay_topnav weui_navbar_item_right pointer" id="per-r">已关注</div>
+                </div>
+                <div class="weui_tab_bd">
+                    <div id="per-fdoc-list"></div>
+                    <div id="per-rdoc-list" class="displaynone"></div>
+                    <div id="personal_loading"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/per_mydoc.js" charset="utf-8"></script>
+</body>
+</html>

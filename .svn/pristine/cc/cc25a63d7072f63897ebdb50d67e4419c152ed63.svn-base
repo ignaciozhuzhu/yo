@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>我</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+</head>
+
+<body>
+
+    <div class="weui_cells weui_cells_access tmargin0 ">
+        <div class="weui_cell w-bg pointer" >
+            <div class="weui_cell_bd weui_cell_primary">
+                    <div class="weui_media_desc res-doc-con-text fontsize17">头像</div> 
+            </div>
+            <div class="weui_cell_ft">
+                <form  action="" enctype="multipart/form-data" method="post" id="per_form">
+                    <div class="form-widget">
+                         <ul class="pic-group" data-role="images">
+                             <li data-role="addfile">
+                                <label class="btn-file" data-role="add">
+                                    <img src=""  class="img-circle avatar display-block" width="60px" height="60px" id="avatar" ref="avatar"/>
+                                    <input type="file" class="input-file" name="files" multiple="multiple" accept="image/*" id="per-info-avatar"/>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>  
+                </form><input type="submit" data-action="submit" id="tosubmit" class="btn primary displaynone" />
+            </div>
+        </div> 
+    </div> 
+    <div id="content">
+        
+
+    </div>
+
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+      <script src="../js/jquery.form.js"></script>
+    <script src="js/per_info.js" charset="utf-8"></script>
+    
+</body>
+</html>

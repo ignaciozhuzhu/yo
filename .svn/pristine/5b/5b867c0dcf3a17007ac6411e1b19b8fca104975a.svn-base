@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>预约成功</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+</head>
+
+<body style="background-color: #fff">
+    <div class="weui_msg res_success_msg">
+	    <div class="weui_icon_area res_success_icon_area">
+	    	<img src="images/res_success.png" class="res_success_img" />
+	    </div>
+	    <div class="weui_text_area res_success_text_area">
+	        <h2 class="weui_msg_title res_success_tit">恭喜您，预约提交成功！</h2>
+	        <p class="weui_msg_desc res_success_desc">您的就诊信息稍后将有客服与您联系</p>
+	        <p class="weui_msg_desc res_success_desc">确定就诊时间以及相关注意事项。您也可以到个人中心查询预约详情！</p>
+	    </div>
+	    <div class="weui_opr_area res_success_opr_area">
+	        <p class="weui_btn_area res_success_btn_area">
+    			<a href="" class="weui_btn weui_btn_primary res_success_btn_primary" onclick="history.go(-1);">关闭</a>
+			</p>
+		</div>
+	</div>
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+      <script src="js/reservation_success.js" charset="utf-8"></script>
+</body>
+</html>

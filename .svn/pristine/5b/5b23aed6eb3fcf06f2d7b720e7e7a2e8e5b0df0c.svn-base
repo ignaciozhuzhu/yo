@@ -1,0 +1,253 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  thisurl,
+  serviceurl,
+  ipurl,
+  protocol,
+  downDistance,
+  setCookie,
+  getCookie,
+  delCookie,
+  getURLPram,
+  clearCookies,
+  getCityIDByName,
+  reminder,
+  reminderSuccess,
+  getLocalTime,
+  checknull,
+  MoneyConversion,
+  MoneyValue,
+  toDecimal,
+  getMobilTime,
+  plusZero
+} from '../../js/common.js';
+
+var data = [];
+var CityID = 33;//默认浙江
+var proname = "";//当前省的名称
+var htmlUrl = "";//设置要跳转的页面
+var Personal_adsBox = React.createClass({
+  componentDidMount:function(){
+    this.setState({data: data});
+  },
+  getInitialState: function() {
+  	 //解析url，提取出前一界面地址
+  	 htmlUrl = "";
+  	 getHtmlUrl();
+     var Location = "";
+	 $.ajax({	  
+		url : thisurl+"getLocation",   	 //请求的Url
+		type : "get",                                           //提交方式
+		dataType : "json",                                       //请求的返回类型 这里为json	
+		async: false,
+		data : { 
+			"location":Location
+			 },
+		contentType : "application/json",        			     //内容类型
+		cache : false,  
+		beforeSend:function(XMLHttpRequest){
+				$("#loading-toast").css("display","block");
+		},                                         //是否异步提交
+		success : function(dt){
+			$("#loading-toast").css("display","none");
+			data = dt.data;
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			$("#loading-toast").css("display","none");
+			return;	
+		}
+ 	});
+	return {data: data};
+  },
+  render: function() {
+    return (
+      <div>
+        <Personal_adsList data={this.state.data}  onCommentSubmit={this.handleCommentSubmit}/>
+      </div>
+    );
+  }
+});
+
+
+var Personal_adsList = React.createClass({
+    render: function() {
+    	var AddressList = this.props.data;	
+        var proNodes = AddressList.map(function (comment) {
+        	if(comment.id%10000 == 0 ){
+        		if(parseInt(comment.id/10000) == CityID){
+        			proname = comment.name;
+        		}
+		        return (
+		          <ProComment 
+		          key={comment.id} 
+		          id={comment.id} 
+		          name={comment.name} 
+		          >
+		          </ProComment>
+		        );
+        	}
+        });
+        var cityNodes = AddressList.map(function (comment) {
+        	if(comment.id%10000 != 0 && comment.id%100 == 0 && parseInt(comment.id/10000) == CityID){
+        		return (
+		          <CityComment 
+		          key={comment.id} 
+		          id={comment.id} 
+		          name={comment.name} 
+		          >
+		          </CityComment>
+		        );
+        	}
+        });
+      return (
+        <div>
+        	<div className="res-ads-now bor-bottom ">
+	        	<span>当前位置：</span>
+	            <span>{proname}</span>
+	        </div>
+	        <div>
+	        	<div className="res-ads-pro">
+	        		{proNodes}
+	        	</div>
+	        	<div className="res-ads-city"> 
+	        		{cityNodes}
+	        	</div>
+            </div>
+        </div>
+      );
+    }
+  });
+
+  var ProComment = React.createClass({
+  	clickPro:function(){
+  		var proBtn = this.refs[this.props.id];
+  		//添加回原有样式
+  		$.each(document.getElementsByClassName("res-ads-pro-w"),function(idx,item){
+  			// item.setAttribute("class", "res-ads-pro-g");
+  			var cls = "res-ads-pro-g";
+  	  		var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');  
+  	      item.className = item.className.replace(reg, ' '); 
+  	  		item.className = "res-ads-pro-g  res-ads-pro-btn";
+  		})
+  		proBtn.setAttribute("class", "res-ads-pro-w");
+  		//记录当前选择的省份ID
+  		CityID = parseInt(this.props.id/10000);
+      proname = this.props.name;
+  		//联动city
+  		$(".res-ads-city").html("");
+  		data.map(function (comment) {
+			if( comment.id%10000 != 0 && comment.id%100 == 0 && parseInt(comment.id/10000) == CityID ){
+				$(".res-ads-city").append("<div class='res-ads-city-w res-ads-city-btn pointer'  id='"+ comment.id +"'>"+comment.name +"</div>");	
+			}
+  		});
+  		$(".res-ads-city-w").click(function(){
+			var id = this.id;
+			var name = this.innerText;
+			goNext(id, name);
+  		});
+  	},
+	  render: function() {
+	  	if(parseInt(this.props.id/10000) == CityID){
+	  		return (
+		    	<div className="res-ads-pro-w res-ads-pro-btn pointer" ref={this.props.id} onClick={this.clickPro} >
+		    		{this.props.name}
+		    	</div>
+		    );
+	  	}else{
+			return (
+		    	<div className="res-ads-pro-g res-ads-pro-btn pointer" ref={this.props.id} onClick={this.clickPro} >
+		    		{this.props.name}
+		    	</div>
+		    );
+	  	}
+	  }
+  });
+  var CityComment = React.createClass({
+  	clickCity:function(){
+  		var id = this.props.id;
+  		var name = this.props.name;
+  		goNext(id, name);
+  	},
+	  render: function() {
+	    return (
+	    	<div className="res-ads-city-w res-ads-city-btn pointer" ref={this.props.id} onClick={this.clickCity} >
+	    		{this.props.name}
+	    	</div>
+	    );
+	  }
+  });
+
+//获取前一页页面的url链接
+var getHtmlUrl = function(){
+	htmlUrl =  protocol + getCookie("gobackURL");
+};
+//跳转到下一页面
+var goNext = function(id, name){
+	//设置参数到cookie内
+	delCookie("cityID");
+	setCookie("cityID", id, 30);
+	delCookie("cityName");
+	setCookie("cityName", name, 30);
+  delCookie("cityName");
+  setCookie("cityName", name, 30);
+  delCookie("proName");
+  setCookie("proName", proname, 30);
+	location.href = htmlUrl;
+};
+
+var Personal_hidden = React.createClass({
+  render: function() {
+    return (
+      <div >
+        <div id="loading-toast" ref="loading-toast" className="weui_loading_toast displaynone">
+          <div className="weui_mask_transparent"></div>
+          <div className="weui_toast">
+            <div className="weui_loading">
+              <div className="weui_loading_leaf weui_loading_leaf_0"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_1"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_2"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_3"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_4"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_5"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_6"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_7"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_8"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_9"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_10"></div>
+              <div className="weui_loading_leaf weui_loading_leaf_11"></div>
+            </div>
+            <p className="weui_toast_content text-align" id="loading-toast-text">正在查询</p>
+          </div>
+        </div>
+
+        <div id="success-toast" className="displaynone">
+          <div className="weui_mask_transparent" id="success-toast-mask"></div>
+          <div className="weui_toast">
+            <i className="weui_icon_toast"></i>
+            <p className="weui_toast_content text-align" id="success-toast-text"></p>
+          </div>
+        </div>
+
+        <div id="fail-toast" className="displaynone">
+          <div className="weui_mask_transparent" id="fail-toast-mask"></div>
+          <div className="weui_toast_fail">
+            <p className="text-align" id="fail-toast-text"></p>
+          </div>
+        </div>
+      </div> 
+    );
+  }
+});
+
+ReactDOM.render(
+  <Personal_adsBox data={data} />,
+  document.getElementById('content')
+);
+
+ReactDOM.render(
+  <Personal_hidden/>,
+  document.getElementById('hiddenContent')
+);

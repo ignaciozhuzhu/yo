@@ -1,0 +1,469 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	serviceurl,
+	ipurl,
+	setCookie,
+	getCookie,
+	delCookie,
+	reminder,
+	checknull,
+	getMobilTime,
+	getURLparam
+} from '../../js/common.js';
+import {
+	SearchHidden
+} from '../../js/components/searchList';
+
+var docData = [];
+var placeData = [];
+var commentData = [];
+var hospitalAddress = "";
+var hospitalName = "";
+var idx = 0;
+var cssTemp = "";
+var attentive = "关注";
+var toggleNum = 1; //展开计数
+
+var Reservation_topBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getURLparam("doctorid");
+		$.ajax({
+			url: serviceurl + "doctor/detail", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				console.log("success: " + JSON.stringify(dt));
+				if (dt.status == "success") {
+					docData = dt.data;
+					hospitalName = checknull(docData.defaulthosname);
+
+					if (dt.data.hasAttention == "N") {
+						attentive = "关注";
+					} else {
+						attentive = "已关注";
+					}
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("医生详情查询失败！");
+				return;
+			}
+		});
+		return {
+			data: docData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        <Reservation_docList data={this.state.data} />
+      </div>
+		);
+	}
+});
+
+var Reservation_docList = React.createClass({
+	goback: function(e) {
+		history.go(-1);
+	},
+	attentClick: function(e) {
+		//判断登陆与否
+		$.ajax({
+			url: serviceurl + "site/getUserInfo",
+			type: "get",
+			dataType: "json",
+			contentType: "application/json",
+			cache: false,
+			async: false,
+			beforeSend: function(XMLHttpRequest) {},
+			success: function(dt) {
+				if (dt.status == "redirect") {
+					//表示未登录
+					$("#dialog-box").show();
+				} else {
+					var doctorid = getURLparam("doctorid");
+					var ajaxurl = serviceurl + "attention/";
+					var str = "关注";
+					if (e.target.textContent == "关注") {
+						//添加关注
+						ajaxurl += "add";
+						str = "已关注";
+					} else {
+						//取消关注
+						ajaxurl += "cancel";
+						str = "关注";
+					}
+					$.ajax({
+						url: ajaxurl, //请求的Url
+						type: "post", //提交方式
+						dataType: "json", //请求的返回类型 这里为json	
+						data: JSON.stringify({
+							"doctorid": doctorid
+						}),
+						contentType: "application/json", //内容类型
+						cache: false, //是否异步提交
+						beforeSend: function(XMLHttpRequest) {
+							$("#loading-toast").css("display", "block");
+						},
+						success: function(dt) {
+							$("#loading-toast").css("display", "none");
+							if (dt.status == "success") {
+								$("#success-toast-text").css("display", "block");
+								$("#res-docdet-att").text(str);
+								$("#success-toast-text").text("操作成功!");
+								if (str == "关注") {
+									$("#res_docdet_gz").attr("src", "images/Shape@2x.png");
+								} else if (str == "已关注") {
+									$("#res_docdet_gz").attr("src", "images/Shape.png");
+								}
+								setTimeout(function() {
+									$("#success-toast").css("display", "none");
+								}, 2000);
+							} else if (dt.status == "fail") {
+								$("#fail-toast").css("display", "block");
+								$("#fail-toast-text").text("操作失败!");
+								setTimeout(function() {
+									$("#fail-toast").css("display", "none");
+								}, 2000);
+								return;
+							} else {
+								$("#fail-toast").css("display", "block");
+								$("#fail-toast-text").text("操作失败!");
+								setTimeout(function() {
+									$("#fail-toast").css("display", "none");
+								}, 2000);
+								return;
+							}
+						},
+						error: function(XMLHttpRequest, textStatus, errorThrown) {
+							$("#loading-toast").css("display", "none");
+							$("#fail-toast").css("display", "block");
+							$("#fail-toast-text").text("操作失败!");
+							setTimeout(function() {
+								$("#fail-toast").css("display", "none");
+							}, 2000);
+							return;
+						}
+					});
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				//toast.show(XMLHttpRequest.responseJSON.message);
+				return;
+			}
+		});
+	},
+	render: function() {
+		var avatar = serviceurl + this.props.data.avatar;
+		return (
+			<div >
+	    	<div className="bg-img">
+	            <div className="padding-bottom ">
+	            </div>
+	            <div className="center-block padding-bottom">
+	                <div className="weui_panel weui_panel_access res-docdet-titbg first-chiled">
+	                    <div className="weui_panel_bd" >
+	                        <div className="weui_media_box weui_media_appmsg res-docdet-box ">
+	                            <div className="weui_media_hd res-docdet-mar">
+	                                <img className="img-rounded res-docdet-img" src={avatar}/>
+	                            </div>
+	                            <div className="weui_media_bd res-docdet-color res-docget-con">
+	                                <div className="docdet">
+	                                    <span className="weui_media_title pull-left res-docdet-name" ref="doctor-name">{this.props.data.fullname}</span>
+	                                    <span ref="doctor-title">{this.props.data.title}</span>
+	                                </div> 
+	                                <div className="weui_media_desc res-docdet-con">
+	                                    <div className="pull-left res-docdet-con-text">
+	                                        <div className="res-docdet-addwid" ref="hospital-name">{hospitalName}</div>
+	                                        <div className="weui_media_desc res-docget-con">
+	                                            <div className="res-docdet-wid">预约量：<span ref="bookingCount">{this.props.data.bookingCount}</span></div>
+	                                            <div className="res-doc-con-null"></div>
+	                                            <div className="res-docdet-wid">咨询量：<span ref="queryCount">{this.props.data.queryCount}</span></div>
+	                                        </div>
+	                                    </div>
+	                                    <div className="pull-right weui_btn weui_btn_mini weui_btn_primary res-docdet-btn pointer" onClick={this.attentClick}>
+	                                	   <img src="images/Shape@2x.png" width="12px" id="res_docdet_gz"/><span id="res-docdet-att" className="fontsize12+" ref="res-docdet-att">{attentive}</span>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	
+			<div className="weui_panel weui_panel_access res-det-marbot res-paddingleft5px tmargin1">
+	            <div className="weui_panel_bd">
+	                <div className="weui_media_box weui_media_text">
+	                    <div className="weui_media_title bmargin05">
+	                        <span className="res-paddingright8px"><img src="images/Group 6 Copy 2@2x.png" width="15px"/></span>
+	                        <span className="fontsize15">擅长</span>
+	                    </div>
+	                    <div className="weui_media_desc fontsize14 lmargin1 bmargin05">
+	                        <span className="color-f6" ref="skill">{this.props.data.skill}</span>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	        
+	        <div className="weui_panel weui_panel_access res-det-marbot res-paddingleft5px tmargin1">
+	            <div className="weui_panel_bd">
+	                <div className="weui_media_box weui_media_text">
+	                    <div className="weui_media_title bmargin05">
+	                        <span className="res-paddingright8px"><img src="images/Oval 94 Copy 3@2x.png" width="15px"/></span>
+	                        <span className="fontsize15">简介</span>
+	                    </div>
+	                    <div className="weui_media_desc res-det-padleft fontsize14 lmargin1 bmargin05">
+	                        <span className="color-f6" ref="brief">{this.props.data.brief}</span>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+    	</div>
+		);
+	}
+});
+
+var Reservation_centerBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getURLparam("doctorid");
+		$.ajax({
+			url: serviceurl + "doctor/listReview", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				if (dt.status == "success") {
+					commentData = dt.data;
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("评论列表查询失败！");
+				return;
+			}
+		});
+		return {
+			data: commentData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        <Reservation_commentList data={this.state.data} />
+      </div>
+		);
+	}
+});
+
+var Reservation_commentList = React.createClass({
+
+	spreadClick: function() {
+
+		if (toggleNum % 2 == 0) {
+			$("#res-toggle-btn").attr("src", "images/right_caret copy@2x.png");
+			toggleNum++;
+		} else if (toggleNum % 2 == 1) {
+			$("#res-toggle-btn").attr("src", "images/down_caret copy@2x.png");
+			toggleNum++;
+		}
+
+		$(".res-det-hidelist").slideToggle();
+	},
+	render: function() {
+		var commentNotes = this.props.data.map(function(comment) {
+			var time = getMobilTime(comment.createtime);
+			idx = idx + 1;
+			if (idx == 1) {
+				return (
+					<Comment 
+	          key={comment.id}
+	          id={comment.id}
+	          words={comment.words}
+	          username={comment.username}
+	          time={time}
+	          >
+	          </Comment>
+				);
+			} else {
+				return (
+					<Dcomment 
+	          key={comment.id}
+	          id={comment.id}
+	          words={comment.words}
+	          username={comment.username}
+	          time={time}
+	          >
+	          </Dcomment>
+				);
+			}
+		});
+		return (
+			<div>
+	      	<div className="weui_panel weui_panel_access res-det-marbot res-paddingleft5px">
+				<div className="weui_panel_bd">
+					<div className="weui_media_box weui_media_text">
+						<div className="weui_media_title res-det-marbot bmargin0">
+							<span className="res-paddingright8px"><img src="images/Oval 94 Copy 3@2x.png" width="15px"/></span>
+							<span className="fontsize15">用户评价</span>
+							<div className="pull-right pointer">
+								<span className="res-det-color" ref="res-det-paner" onClick={this.spreadClick}>更多</span>
+							</div>
+						</div>
+						<div>
+				        	{commentNotes}
+				        </div>
+					</div>
+				</div>
+			</div>
+	    </div>
+		);
+	}
+});
+
+var Comment = React.createClass({
+	render: function() {
+		return (
+			<div className="weui_media_desc res-det-padleft res-det-marbot-mx lmargin1 tpadding1" ref={this.props.id} >
+			<div className="res-det-padbot">  {this.props.words}  </div>
+			<div className="fontsize10 color-f6">
+				<span>  {this.props.username} </span>
+				<span className="pull-right"> {this.props.time}  </span>
+			</div>
+		</div>
+		);
+	}
+});
+var Dcomment = React.createClass({
+	render: function() {
+		return (
+			<div className="weui_media_desc res-det-padleft res-det-marbot-mx lmargin1 displaynone res-det-hidelist" ref={this.props.id} >
+		<div className="res-det-padbot">  {this.props.words}  </div>
+		<div className="fontsize10 color-f6">
+			<span>  {this.props.username} </span>
+			<span className="pull-right"> {this.props.time}  </span>
+		</div>
+	</div>
+		);
+	}
+});
+
+ReactDOM.render(
+	<Reservation_topBox data={docData} />,
+	document.getElementById('topContent')
+);
+
+ReactDOM.render(
+	<Reservation_centerBox data={commentData} />,
+	document.getElementById('centerContent')
+);
+
+var Reservation_downBox = React.createClass({
+	reservationClick: function() {
+		location.href = "reservation_resdet.html?doctorid=" + getURLparam("doctorid") + "&hospitalID=" + getURLparam("hospitalID");
+	},
+	patientClick: function() {
+		delCookie("gobackURL");
+		setCookie("gobackURL", ipurl + "/reservation/reservation_det.html", 30);
+		location.href = "reservation_patrep.html?doctorid=" + getURLparam("doctorid");
+	},
+	doctorClick: function() {
+		reminder("该功能下一版上线，敬请期待");
+	},
+	render: function() {
+		return (
+			<div className="weui_tabbar">
+	        <a href="javascript:;" className="weui_tabbar_item res_det_bottom_a" onClick={this.patientClick} >
+	            <div className="weui_cell res_det_bottom_box pointer">
+	            	<div className="weui_cell_hd res_det_bimg">
+									<img src="images/Fill 91 Copy@2x.png" className="margin-right15 displayblock per-imggroup" />
+								</div>
+	            	<div className="weui_cell_bd weui_cell_primary">
+	            		<span className="weui_media_title res_det_bottom_text">患者报到</span>
+	            	</div>
+	         	</div>
+	        </a>
+	        <a href="javascript:;" className="weui_tabbar_item res_det_bottom_a" onClick={this.reservationClick} >
+	            <div className="weui_cell res_det_bottom_box pointer">
+	            	<div className="weui_cell_hd res_det_bimg"><img src="images/Fill 158@2x.png" className="margin-right15 displayblock per-imggroup" /></div>
+	            	<div className="weui_cell_bd weui_cell_primary">
+	            		<span className="weui_media_title res_det_bottom_text">预约挂号</span>
+	            	</div>
+	         	</div>
+	        </a>
+	        <a href="javascript:;" className="weui_tabbar_item res_det_bottom_a" onClick={this.doctorClick} >
+	            <div className="weui_cell res_det_bottom_box pointer">
+	            	<div className="weui_cell_hd res_det_bimg"><img src="images/Fill 156@2x.png" className="margin-right15 displayblock per-imggroup" /></div>
+	            	<div className="weui_cell_bd weui_cell_primary">
+	            		<span className="weui_media_title res_det_bottom_text">咨询医生</span>
+	            	</div>
+	         	</div>
+	        </a>
+	    </div>
+		);
+	}
+});
+ReactDOM.render(
+	<Reservation_downBox/>,
+	document.getElementById('downContent')
+);
+
+ReactDOM.render(
+	<SearchHidden toastText="正在加载" />,
+	document.getElementById('hiddenContent')
+);
+
+var Reservation_dialog = React.createClass({
+	cancelClick: function() {
+		$("#dialog-box").hide();
+	},
+	sureClick: function() {
+		location.href = "../login.html?backurl=reservation/reservation_det.html?doctorid=" + getURLparam("doctorid");
+	},
+	render: function() {
+		return (
+			<div>
+				<div className="weui_dialog_confirm displaynone" id="dialog-box">
+					<div className="weui_mask"></div>
+					<div className="weui_dialog">
+							<div className="weui_dialog_hd text-align"><strong className="weui_dialog_title">温馨提示</strong></div>
+							<div className="weui_dialog_bd text-align">您还未登录，请先登录</div>
+							<div className="weui_dialog_ft text-align">
+									<a href="#" className="weui_btn_dialog default" onClick={this.cancelClick}>取消</a>
+									<a href="#" className="weui_btn_dialog primary" onClick={this.sureClick}>确定</a>
+							</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+});
+ReactDOM.render(
+	<Reservation_dialog />,
+	document.getElementById('dialog')
+);

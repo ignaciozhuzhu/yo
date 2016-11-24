@@ -1,0 +1,356 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	serviceurl,
+	ipurl,
+	setCookie,
+	getCookie,
+	delCookie,
+	reminder,
+	checknull,
+	getMobilTime,
+	getURLparam,
+	getHtmlFontSize
+} from '../../js/common.js';
+
+import {
+	SearchHidden
+} from '../../js/components/searchList';
+
+import {
+	Reservation_dialog,
+	Reservation_docList
+} from '../../js/components/reservationComp';
+
+getHtmlFontSize();
+var docData = [];
+var titData = [];
+var placeData = [];
+var commentData = [];
+var hospitalAddress = "";
+var hospitalName = "";
+var idx = 0;
+var beief_clickNum = 0;
+var cssTemp = "";
+var attentive = "关注";
+var toggleNum = 1; //展开计数
+
+var getDoctorID = function() {
+	var urlinfo = window.location.href; //获取当前页面的url 
+	//var len = urlinfo.length; //获取url的长度 
+	var offset = urlinfo.indexOf("?"); //设置参数字符串开始的位置 
+	var val = "";
+	if (offset > 0) {
+		val = getURLparam("doctorid");
+		setCookie("hospitalID", "", 30);
+	} else {
+		val = getCookie("doctorID");
+	}
+	return val;
+};
+
+var Reservation_topBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getURLparam("doctorid");
+		$.ajax({
+			url: serviceurl + "doctor/detail", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				console.log("success: " + JSON.stringify(dt));
+				if (dt.status == "success") {
+					docData = dt.data;
+					hospitalName = checknull(docData.defaulthosname);
+
+					if (dt.data.hasAttention == "N") {
+						attentive = "关注";
+					} else {
+						attentive = "已关注";
+					}
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				if (XMLHttpRequest.status == 404) {
+					location.href = "../404.html";
+				}
+				reminder("医生详情查询失败！");
+				return;
+			}
+		});
+		return {
+			data: docData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        <Reservation_docList data={this.state.data} getDoctorID={getDoctorID()} attentive={attentive} />
+      </div>
+		);
+	}
+});
+
+
+var Reservation_titBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getURLparam("doctorid");
+		$.ajax({
+			url: serviceurl + "doctor/detail", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				console.log("success: " + JSON.stringify(dt));
+				if (dt.status == "success") {
+					titData = dt.data;
+					hospitalName = checknull(titData.defaulthosname);
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				if (XMLHttpRequest.status == 404) {
+					location.href = "../404.html";
+				}
+				reminder("医生详情查询失败！");
+				return;
+			}
+		});
+		return {
+			data: titData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        		<Reservation_titList data={this.state.data} />
+      		</div>
+     		);
+		}
+	});
+var Reservation_titList = React.createClass({
+	patientClick: function() {
+		delCookie("gobackURL");
+		setCookie("gobackURL", ipurl + "/reservation/reservation_det.html", 30);
+		location.href = "reservation_patrep.html?doctorid=" + getURLparam("doctorid");
+	},
+	reservationClick: function() {
+		location.href = "reservation_resdet.html?doctorid=" + getURLparam("doctorid") + "&hospitalID=" + getURLparam("hospitalID");
+	},
+	doctorClick: function() {
+		reminder("该功能下一版上线，敬请期待");
+	},
+	briefClick: function() {
+		beief_clickNum = beief_clickNum + 1;
+		if( beief_clickNum%2 == 1 ){
+			$("#beief_det").removeClass("wrap-class-2");
+			$("#beief_btn").text("收起");
+		}else if( beief_clickNum%2 == 0 ){
+			$("#beief_det").addClass("wrap-class-2");
+			$("#beief_btn").text("查看更多");
+		}
+	},
+	render: function() {
+		return (
+			<div>       
+	            <div className="weui_flex res_doctor_tool_box">
+		            <div className="weui_flex_item pointer" onClick={this.reservationClick}>
+		            	<div className="text-align"><img src="images/t_registration.png" className="res_doctor_tool_img"/></div>
+		            	<div className="res_doctor_tool_word">预约挂号</div>
+		            </div>
+		            <div className="weui_flex_item pointer" onClick={this.patientClick}>
+		            	<div className="text-align"><img src="images/t_reports.png" className="res_doctor_tool_img" /></div>
+		            	<div className="res_doctor_tool_word">患者报到</div>
+		            </div>
+		            <div className="weui_flex_item pointer" onClick={this.doctorClick}>
+		            	<div className="text-align"><img src="images/t_consultation.png" className="res_doctor_tool_img" /></div>
+		            	<div className="res_doctor_tool_word">线上咨询</div>
+		            </div>
+		        </div>
+
+				<div className="weui_panel weui_panel_access res_doctor_skill_box">
+			        <div className="weui_panel_hd res_doctor_skill_title">
+			        	<span className="res_doctor_skill_font"><img src="images/icon_goodat.png" className="res_doctor_skill_img"/></span>
+			        	<span className="res_doctor_skill_font">擅长</span>
+			        </div>
+			        <div className="weui_panel_bd res_doctor_skill_word">{this.props.data.skill}</div>
+			    </div>
+				
+				<div className="weui_panel weui_panel_access res_doctor_skill_box">
+			        <div className="weui_panel_hd res_doctor_skill_title">
+			        	<span className="res_doctor_skill_font"><img src="images/icon_introduction.png" className="res_doctor_skill_img"/></span>
+			        	<span className="res_doctor_skill_font">简介</span>
+			        </div>
+			        <div className="weui_panel_bd res_doctor_skill_word wrap-class-2" id="beief_det">{this.props.data.brief}</div>
+			        <div className="res_doctor_more" onClick={this.briefClick} id="beief_btn">查看更多</div>
+			    </div>
+	    	</div>
+		);
+	}
+});
+
+var Reservation_centerBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getURLparam("doctorid");
+		$.ajax({
+			url: serviceurl + "doctor/listReview", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				if (dt.status == "success") {
+					commentData = dt.data;
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("评论列表查询失败！");
+				return;
+			}
+		});
+		return {
+			data: commentData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        <Reservation_commentList data={this.state.data} />
+      </div>
+		);
+	}
+});
+
+var Reservation_commentList = React.createClass({
+
+	spreadClick: function() {
+		location.href = "reservation_comment.html?doctorid=" + getURLparam("doctorid");
+	},
+	render: function() {
+		var commentNotes = this.props.data.map(function(comment) {
+			var time = getMobilTime(comment.createtime);
+			idx = idx + 1;
+			if (idx == 1) {
+				return (
+					<Comment 
+	          key={comment.id}
+	          id={comment.id}
+	          words={comment.words}
+	          username={comment.username}
+	          time={time}
+	          >
+	          </Comment>
+				);
+			} else {
+				return (
+					<Dcomment 
+	          key={comment.id}
+	          id={comment.id}
+	          words={comment.words}
+	          username={comment.username}
+	          time={time}
+	          >
+	          </Dcomment>
+				);
+			}
+		});
+		return (
+			<div className="res_doctor_skill_box">
+				<div className="weui_panel weui_panel_access">
+			        <div className="weui_panel_hd res_doctor_skill_title">
+			        	<span><img src="images/user_logo.png" className="comment_img" /></span>
+			        	<span className="res_doctor_skill_font"><img src="images/icon_comment.png" className="res_doctor_skill_img"/></span>
+			        	<span className="res_doctor_skill_font">评论</span>
+			        </div>
+			        <div className="weui_panel_bd res_doctor_skill_word">{commentNotes}</div>
+			        <div className="res_doctor_more" href="#" onClick={this.spreadClick}>查看更多</div>
+			    </div>
+		    </div>
+		);
+	}
+});
+
+var Comment = React.createClass({
+	render: function() {
+		return (
+			<div className="weui_media_desc" ref={this.props.id} >
+			<div className="">{this.props.words}</div>
+			<div className="">
+				<span>  {this.props.username}</span>
+				<span className="pull-right"> {this.props.time}  </span>
+			</div>
+		</div>
+		);
+	}
+});
+var Dcomment = React.createClass({
+	render: function() {
+		return (
+			<div className="weui_media_desc displaynone" ref={this.props.id} >
+				<div className="">{this.props.words}</div>
+				<div className="">
+					<span>  {this.props.username}</span>
+					<span className="pull-right"> {this.props.time}  </span>
+				</div>
+			</div>
+		);
+	}
+});
+
+ReactDOM.render(
+	<Reservation_topBox data={docData} />,
+	document.getElementById('topContent')
+);
+
+ReactDOM.render(
+	<Reservation_titBox data={titData} />,
+	document.getElementById('titContent')
+);
+
+ReactDOM.render(
+	<Reservation_centerBox data={commentData} />,
+	document.getElementById('centerContent')
+);
+
+ReactDOM.render(
+	<SearchHidden toastText="正在加载" />,
+	document.getElementById('hiddenContent')
+);
+
+ReactDOM.render(
+	<Reservation_dialog href="reservation_det" getDoctorID={getDoctorID()} />,
+	document.getElementById('dialog')
+);

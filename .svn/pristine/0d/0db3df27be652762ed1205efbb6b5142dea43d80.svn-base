@@ -1,0 +1,207 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  serviceurl,
+  ipurl,
+  setCookie,
+  getCookie,
+  delCookie,
+  reminder
+} from '../../js/common.js';
+import {
+  SearchHidden
+} from '../../js/components/searchList';
+
+var Hospitalid = "";
+var CurrentPage = "";
+
+var latitude = "";
+var longitude = "";
+var Personal_mainBox = React.createClass({
+  getInitialState: function() {
+    return {
+      data: []
+    };
+  },
+  componentDidMount: function() {
+    Hospitalid = getCookie("hospitalID");
+    //医院信息
+    $.ajax({
+      url: serviceurl + "hospital/detail",
+      dataType: 'json',
+      cache: false,
+      data: {
+        "hospitalid": Hospitalid
+      },
+      contentType: "application/json",
+      type: "get",
+      async: false,
+      success: function(data) {
+        console.log("Hospital: " + JSON.stringify(data));
+        if (data.status == "success") {
+          var HospitalInfo = data.data;
+          $("#header").attr("src", serviceurl + HospitalInfo.avatar);
+          $("#res-hos-info-brief").text(HospitalInfo.brief);
+        } else if (data.status == "fail") {
+          reminder("医院信息查询失败！");
+          return;
+        } else {
+          reminder("医院信息查询错误！");
+          return;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+    //评论信息
+    $.ajax({
+      url: serviceurl + "hospital/queryReview",
+      dataType: 'json',
+      cache: false,
+      data: {
+        "hospitalid": Hospitalid,
+        "currentPage": CurrentPage
+      },
+      contentType: "application/json",
+      type: "get",
+      async: false,
+      success: function(data) {
+        console.log("queryReview: " + JSON.stringify(data));
+        if (data.status == "success") {
+          var HospitalReview = data.data;
+          $.each(HospitalReview, function(idx, item) {
+            $("#res-hos-review").append(
+              "<div class=' res-det-borbot'>" +
+              "<div class='weui_media_desc res-det-padleft padding5-15'>" +
+              "<div>" +
+              "<span>" + item.words + "</span>" +
+              "</div>" +
+              "<div  class='paddingtop5 coloraaa'>" +
+              "<span class='pull-left display-inline-block width30'>" + item.username + "</span>" +
+              "<span class='pull-right text-right display-overflow-space width30'' style=''>" + item.reviewtime.split(" ")[0] + "</span>" +
+              "<span class='text-align display-inline-block width30'>" + item.mobile + "</span>" +
+              "</div>" +
+              "</div>" +
+              "</div>"
+            )
+          });
+        } else if (data.status == "fail") {
+          reminder("医院信息查询失败！");
+          return;
+        } else {
+          reminder("医院信息查询错误！");
+          return;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
+  goback: function(e) {
+    history.go(-1);
+  },
+  nextPage: function() {
+    delCookie("hospitalID");
+    setCookie("hospitalID", Hospitalid, 30);
+    delCookie("gobackURL");
+    setCookie("gobackURL", ipurl + "/reservation/reservation_hos_info.html", 30);
+    location.href = "reservation_hos_eva.html";
+  },
+  unfold: function() {
+    $("res-hos-info-hos").removeClass("res-hos-info-brief");
+  },
+  goDocClick: function() {
+    delCookie("hospitalID");
+    setCookie("hospitalID", Hospitalid);
+    delCookie("gobackURL");
+    setCookie("gobackURL", "reservation_hoc_info.html");
+    location.href = "reservation_doc.html";
+  },
+  goDisease: function() {
+    reminder("建设中");
+  },
+  render: function() {
+    return (
+      <div>
+          <div><img src="" width="100%" id="header"/></div>
+          <div className="weui_grids backgroundfff">
+            <div className="weui_grid pointer res_hosInfo_box" onClick={this.goDisease}>
+              <div className="text-align">
+                <img src="images/ic_hospital_disease.png" height="40px;"/>
+              </div>
+              <p className="weui_grid_label">
+                疾病自查
+              </p>
+            </div>
+            <div className="weui_grid pointer res_hosInfo_box" onClick={this.goDocClick}>
+              <div className="text-align">
+                <img src="images/ic_home_appointment.png" height="40px;" />
+              </div>
+              <p className="weui_grid_label">
+                预约挂号
+              </p>
+            </div>
+            <div className="weui_grid pointer displaynone">
+              <div className="text-align">
+                <img src="images/ic_hospital_desc.png" height="40px;" />
+              </div>
+              <p className="weui_grid_label">
+                医院详情
+              </p>
+            </div>
+          </div>
+
+          <div className="weui_panel weui_panel_access res-det-marbot res-paddingleft5px tmargin1">
+              <div className="weui_panel_bd">
+                  <div className="weui_media_box weui_media_text">
+                        <div className="weui_media_title bmargin05">
+                          <span className="res-paddingright8px">
+                            <img src="images/ic_desc.png" width="15px"/>
+                          </span>
+                          <span className="fontsize15">医院简介</span>
+                        </div>
+                        <div className="res-det-padleft fontsize14 lmargin1 bmargin05">
+                          <span id="res-hos-info-brief" className="res-hos-info-brief"></span>
+                        </div>
+                    </div>
+              </div>
+          </div>
+
+          <div className="displaynone">
+            <div className="weui_panel weui_panel_access res-det-marbot res-paddingleft5px tmargin1">
+              <div className="weui_panel_bd">
+                <div className="weui_media_box weui_media_text">
+                  <div className="weui_media_title res-det-borbot res-det-marbot">
+                    <span className="res-paddingright8px res-paddingright5px"><img src="images/Oval 94 Copy 3@2x.png" width="15px"/></span>
+                    <span className="fontsize15">用户评价</span>
+                    <div className="pull-right pointer" onClick={this.nextPage}>
+                      <span className="res-det-color">展开</span>
+                      <span><img src="images/right_caret copy@2x.png"/></span>
+                    </div>
+                  </div>
+
+                  <div id="res-hos-review">
+                    
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    );
+  }
+});
+ReactDOM.render(
+  <Personal_mainBox />,
+  document.getElementById('content')
+);
+
+ReactDOM.render(
+  <SearchHidden toastText="正在查询" />,
+  document.getElementById('hiddenContent')
+);

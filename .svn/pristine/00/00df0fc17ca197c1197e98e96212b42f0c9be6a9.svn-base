@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+    <title>牙艺</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../css/slider.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=Sa66gwC7GkUIIpGxsS6GkEffudlGiKqN&s=1"></script>
+</head>
+
+<body>
+    <div id="content"></div>
+    <div id="container" style="overflow: hidden;position: relative;z-index: 0;background-color: rgb(243, 241, 236);color: rgb(0, 0, 0);text-align: left;height: 500px;"></div> 
+    <div id="hiddenContent"></div>
+    <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+    <script src="../js/main.js" charset="utf-8"></script>
+    <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/reservation_hos_info.js" charset="utf-8"></script>
+</body>
+</html>

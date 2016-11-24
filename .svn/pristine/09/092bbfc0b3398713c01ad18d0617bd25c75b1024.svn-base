@@ -1,0 +1,483 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	serviceurl,
+	reminder
+} from '../../js/common.js';
+import {
+	SearchHidden,
+	Search_Display,
+	HosLevList,
+	DocComment,
+	DiseaseList
+} from '../../js/components/searchList';
+
+var reldata = [];
+var Keyword = ""; //搜索的关键字
+var Orderid = "";
+var Countycode = "";
+var Gradelevel = "";
+var Diseaseid = "";
+var CurrentPage = 1;
+var PointX = "";
+var PointY = "";
+var AdsId = "";
+var AdsName = "";
+var CityID = 33;
+var Location = "";
+var dataSize = 0;
+
+//--------------------------------公共函数-------------------------------------------------
+var appendData = function() {
+	$.ajax({
+		url: serviceurl + "doctor/query", //请求的Url
+		type: "get", //提交方式
+		dataType: "json", //请求的返回类型 这里为json	
+		data: {
+			"keyword": Keyword,
+			"orderid": Orderid,
+			"countycode": Countycode,
+			"gradelevel": Gradelevel,
+			"diseaseid": Diseaseid,
+			"currentPage": CurrentPage,
+			"pointX": PointX,
+			"pointY": PointY
+		},
+		contentType: "application/json", //内容类型
+		cache: false,
+		async: false, //是否异步提交
+		beforeSend: function(XMLHttpRequest) {
+			$("#loading-toast").css("display", "block");
+		},
+		success: function(dt) {
+			$("#loading-toast").css("display", "none");
+			if (dt.status == "success") {
+				dt.data.forEach(function(e) {
+					reldata.push(e);
+				});
+				dataSize = dt.data.length;
+				// reminder("success: " + JSON.stringify(dt));
+			}
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			$("#loading-toast").css("display", "none");
+			$("#fail-toast").css("display", "block");
+			$("#fail-toast-text").text("医生信息查询失败!");
+			setTimeout(function() {
+				$("#fail-toast").css("display", "none");
+			}, 2000);
+			return;
+		}
+	});
+};
+var refleshData = function() {
+	$.ajax({
+		url: serviceurl + "doctor/query", //请求的Url
+		type: "get", //提交方式
+		dataType: "json", //请求的返回类型 这里为json	
+		data: {
+			"keyword": Keyword,
+			"orderid": Orderid,
+			"countycode": Countycode,
+			"gradelevel": Gradelevel,
+			"diseaseid": Diseaseid,
+			"currentPage": CurrentPage,
+			"pointX": PointX,
+			"pointY": PointY
+		},
+		contentType: "application/json", //内容类型
+		cache: false,
+		async: false, //是否异步提交
+		beforeSend: function(XMLHttpRequest) {
+			$("#loading-toast").css("display", "block");
+		},
+		success: function(dt) {
+			$("#loading-toast").css("display", "none");
+			if (dt.data.length == 0) {
+				reldata = [];
+			} else {
+				reldata = dt.data;
+				dataSize = dt.data.length;
+			}
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			$("#loading-toast").css("display", "none");
+			$("#fail-toast").css("display", "block");
+			$("#fail-toast-text").text("医生信息查询失败!");
+			setTimeout(function() {
+				$("#fail-toast").css("display", "none");
+			}, 2000);
+			return;
+		}
+	});
+};
+//------------------------------公共函数 end-----------------------------------------------
+
+//-----------------------------top-------------------------------------------------
+var Search_Top = React.createClass({
+	change: function() {
+		Keyword = this.refs.search_input.value;
+		Orderid = "";
+		Countycode = "";
+		Gradelevel = "";
+		Diseaseid = "";
+		CurrentPage = 1;
+		PointX = "";
+		PointY = "";
+		refleshData();
+		this.props.onCommentSubmit(reldata);
+	},
+	goback: function(e) {
+		history.go(-1);
+	},
+	labelClick: function() {
+		this.refs.search_text.style.display = "none";
+		this.refs.search_input.value = "";
+	},
+	render: function() {
+		return (
+			<div className="container-fluid bg-img">
+		    	<div className="search-padding-3-0">
+		            <div className="weui_search_bar search-bg search-padding0" ref="search_bar" name="search_bar">
+			            <div className="weui_search_outer search_radius">
+			                <div className="weui_search_inner">
+			                    <i className="weui_icon_search"></i>
+			                    <input type="search" className="weui_search_input" ref="search_input" name="search_input" id="search_input" placeholder="搜索医院、医生、疾病" required  onInput={this.change} />
+			                </div>
+			                <label htmlFor="search_input" className="weui_search_text" ref="search_text" name="search_text" onClick={this.labelClick}>
+			                    <i className="weui_icon_search"></i>
+			                    <span className="search-overflow">搜索医院、医生、疾病</span>
+			                </label>
+			            </div>
+		            </div>
+		        </div>
+			</div>
+		);
+	}
+});
+//-----------------------------top end-------------------------------------------------
+
+//-----------------------------Search_condition-------------------------------------------------
+var Search_condition = React.createClass({
+	componentDidMount: function() {
+		var props = this.props;
+		//添加下拉框的点击事件
+		$(".search-sel-off").click(function() {
+			var listId = $(this).attr("id");
+			if ($(this).parent().attr("class") == "weui_navbar_bug") {
+				$(this).parent().addClass("show");
+				$(this).find("img").attr("src", "images/down_caret copy@2x.png")
+				$(this).addClass("search-sel-on");
+				$("#mask").removeClass("displaynone")
+				$("#" + listId + "-list").stop().slideDown();
+			} else if ($(this).parent().attr("class") == "weui_navbar_bug show") {
+				if ($(this).attr("class") == "weui_navbar_item search-sel-off search-sel-on") {
+					$(this).removeClass("search-sel-on");
+					$(this).parent().removeClass("show");
+					$(this).find("img").attr("src", "images/right_caret copy@2x.png")
+					$("#mask").addClass("displaynone")
+					$("#" + listId + "-list").stop().slideUp();
+				} else if ($(this).attr("class") == "weui_navbar_item search-sel-off") {
+					$(".search-sel-off").removeClass("search-sel-on");
+					$(".search-updown").attr("src", "images/right_caret copy@2x.png")
+					$(this).addClass("search-sel-on");
+					$(this).find("img").attr("src", "images/down_caret copy@2x.png")
+					$(".list-list").hide();
+					$("#" + listId + "-list").show();
+				}
+			}
+		});
+		//加载城市分类列表项
+		$.ajax({
+			url: serviceurl + "site/getLocation", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			data: {
+				"id": AdsId,
+				"name": AdsName
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(data) {
+				if (data.status == "success") {
+					var AddressList = data.data;
+					$.each(AddressList, function(idx, item) {
+						if (item.id % 10000 == 0 && item.id / 10000 != CityID) {
+							$(".res-ads-pro").append("<div class='res-ads-pro-g res-ads-pro-btn pointer' id='" + item.id + "'>" + item.name + "</div>");
+						} else if (item.id % 10000 == 0 && item.id / 10000 == CityID) {
+							$(".res-ads-pro").append("<div class='res-ads-pro-w res-ads-pro-btn pointer' id='" + item.id + "'>" + item.name + "</div>");
+						} else if (item.id % 10000 != 0 && item.id % 100 == 0 && parseInt(item.id / 10000) == CityID) {
+							$(".res-ads-city").append(
+								"<label class='weui_cell weui_check_label res-ads-city-w res-ads-city-btn pointer' for='ads" + item.id + "' name='ads" + item.id + "'>" +
+								"<div class='weui_cell_bd weui_cell_primary' id='search-adsname'>" + item.name + "</div>" +
+								"<div class='weui_cell_ft'>" +
+								"<input type='radio'class='weui_check' name='radioads' id='ads" + item.id + "' value='" + item.id + "'/>" +
+								"<span class='weui_icon_checked'></span>" +
+								"</div>" +
+								"</label>");
+						}
+					});
+					$(".res-ads-pro-btn").click(function() {
+						$(".res-ads-pro-w").addClass("res-ads-pro-g");
+						$(".res-ads-pro-w").removeClass("res-ads-pro-w");
+						$(this).addClass("res-ads-pro-w");
+						$(this).removeClass("res-ads-pro-g");
+						$(".res-ads-city").html("");
+						var ProId = $.trim($(this).attr("id"));
+						$.each(AddressList, function(idx, item) {
+							var CityNO = parseInt(item.id / 10000);
+							var CityNo = item.id / 10000;
+							if (item.id % 10000 != 0 && item.id % 100 == 0 && CityNO == ProId / 10000) {
+								$(".res-ads-city").append(
+									"<label class='weui_cell weui_check_label res-ads-city-w res-ads-city-btn pointer' for='ads" + item.id + "' name='ads" + item.id + "'>" +
+									"<div class='weui_cell_bd weui_cell_primary' id='search-adsname'>" + item.name + "</div>" +
+									"<div class='weui_cell_ft'>" +
+									"<input type='radio'class='weui_check' name='radioads' id='ads" + item.id + "' value='" + item.id + "'/>" +
+									"<span class='weui_icon_checked'></span>" +
+									"</div>" +
+									"</label>");
+							}
+						});
+						$(".res-ads-city-btn").click(function() {
+							$(".res-ads-city-g").addClass("res-ads-city-w");
+							$(".res-ads-city-g").removeClass("res-ads-city-g");
+							$(this).addClass("res-ads-city-g");
+							$(this).removeClass("res-ads-city-w");
+						});
+					});
+				} else if (data.status == "fail") {
+					reminder("查询失败");
+				} else {
+					reminder("查询错误");
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("医生信息查询失败！");
+				return;
+			}
+		});
+		//加载智能排序列表项
+		$.ajax({
+			url: serviceurl + "doctor/listOrder", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			data: {},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(data) {
+				if (data.status == "success") {
+					var SearchList = data.data;
+					$.each(SearchList, function(idx, item) {
+						$("#search-order-list").append(
+							"<label class='weui_cell weui_check_label search_my_label pointer' for='ord" + item.orderid + "'  name='ord" + item.orderid + "'>" +
+							"<div class='weui_cell_bd weui_cell_primary'>" + item.ordername + "</div>" +
+							"<div class='weui_cell_ft'>" +
+							"<input type='radio' class='weui_check' name='radioord' id='ord" + item.orderid + "'>" +
+							"<span class='weui_icon_checked'></span>" +
+							"</div>" +
+							"</label>"
+						)
+					});
+				} else if (data.status == "fail") {
+					reminder("查询失败");
+				} else {
+					reminder("查询错误");
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("智能排序信息查询失败！");
+				return;
+			}
+		});
+		//添加医院等级下拉列表的点击事件
+		$(".list-list").on("click", "label", function() {
+			$(".list-list").slideUp();
+			$("#mask").addClass("displaynone")
+			$(".search-sel-off").removeClass("search-sel-on");
+			$(".search-sel-off").parent().removeClass("show");
+			var Texttype = $(this).attr("name").substring(0, 3);
+			if (Texttype == "ads") {
+				Countycode = parseInt(($(this).attr("name").substring(3)) / 100);
+				$("#search-now-ads").html(this.textContent);
+			} else if (Texttype == "lev") {
+				Gradelevel = $(this).attr("name").substring(3);
+			} else if (Texttype == "dis") {
+				Diseaseid = $(this).attr("name").substring(3);
+			} else if (Texttype == "ord") {
+				Orderid = $(this).attr("name").substring(3);
+			}
+			refleshData();
+			props.onCommentSubmit(reldata);
+		});
+	},
+	disClick: function(comment) {
+		$(".weui_icon_checked").attr("class", "weui_icon_checkednone");
+		$(".list-list").slideUp();
+		$("#mask").addClass("displaynone")
+		$(".search-sel-off").removeClass("search-sel-on");
+		$(".search-sel-off").parent().removeClass("show");
+		if (typeof comment == "string") {
+			$("#" + comment + "+.weui_icon_checkednone").attr("class", "weui_icon_checked");
+			$("#" + comment + "+.weui_icon_checked").addClass("weui_icon_checkedyes");
+			var t_name = $(this).attr("name") || comment;
+			if (t_name) {
+				var t_name_stype = t_name.substring(3);
+				var Texttype = t_name.substring(0, 3);
+				if (Texttype == "ads") {
+					Countycode = parseInt((t_name_stype) / 100);
+					$("#search-now-ads").html(this.textContent);
+				} else if (Texttype == "lev") {
+					Gradelevel = t_name_stype;
+				} else if (Texttype == "dis") {
+					Diseaseid = t_name_stype;
+				} else if (Texttype == "ord") {
+					Orderid = t_name_stype;
+				}
+				refleshData();
+				this.props.onCommentSubmit(reldata);
+			}
+		} else if (typeof comment == "object") {
+			Diseaseid = "";
+			CurrentPage = 1;
+			refleshData();
+			this.props.onCommentSubmit(reldata);
+		}
+
+	},
+	render: function() {
+		return (
+			<div className="weui_tab search-pos-rel pointer">
+			<div className="weui_navbar_bug" >
+				<div className="weui_navbar_item search-sel-off" id="search-address" ref="search-address">
+					<span className="" id="search-now-ads" ref="search-now-ads">选择地址</span>
+					<span className="lmargin1">
+						<img src="images/right_caret copy@2x.png" className="search-updown" width="12px" />
+					</span>	
+				</div>
+				<div className="weui_navbar_item search-sel-off" ref="search-level" id="search-level">
+					<span className="">医院等级</span>
+					<span className="lmargin1">
+						<img src="images/right_caret copy@2x.png" className="search-updown" width="12px" />
+					</span>
+				</div>
+				<div className="weui_navbar_item search-sel-off" ref="search-disease" id="search-disease">
+					<span className="" >疾病分类</span>
+					<span className="lmargin1">
+						<img src="images/right_caret copy@2x.png" className="search-updown" width="12px" />
+					</span>
+				</div>
+				<div className="weui_navbar_item search-sel-off" ref="search-order" id="search-order">
+					<span className="">智能排序</span>
+					<span className="lmargin1">
+						<img src="images/right_caret copy@2x.png" className="search-updown" width="12px" />
+					</span>
+				</div>
+			</div>
+				<div ref="search-list" id="search-list" className="weui_tab_bd pointer search-list">
+					<div className="weui_cells weui_cells_radio res-datedet-margintop0 displaynone list-list" ref="search-address-list" id="search-address-list" >
+						<div className="res-ads-pro"></div>
+						<div className="res-ads-city"></div>
+					</div>
+					<HosLevList />
+					<DiseaseList disClick={this.disClick} />
+					<div className="weui_cells weui_cells_radio res-datedet-margintop0 displaynone list-list" ref="search-order-list" id="search-order-list"></div>
+				</div>
+			</div>
+
+		);
+	}
+});
+
+//-----------------------------Search_condition end------------------------------------------
+
+
+//-----------------------------Search_relist-------------------------------------------------
+var Search_relist = React.createClass({
+	nextPage: function() {
+		CurrentPage++;
+		appendData();
+		this.props.onCommentSubmit(reldata);
+	},
+	render: function() {
+		var listsize = this.props.data.length;
+		if (listsize % 10 != 0 && listsize >= 1)
+			var style = {
+				display: "none"
+			}
+		if (listsize < 1) {
+			return (
+				<div className="weui_panel_bd" >
+					<div className="weui_tab_bd search-doctor-list" id="res-doc-list" ref="search-doctor-list">
+						<div className='text-align res-docoter-color'>未搜索到任何数据!</div>
+					</div>
+		        </div>
+			);
+		} else {
+			var hrelNodes = this.props.data.map(function(comment) {
+				return (
+					<DocComment 
+		          	key={comment.id}
+		          	id={comment.id}
+		          	fullname={comment.fullname} 
+		          	title={comment.title} 
+		          	bookingCount={comment.bookingCount} 
+		          	queryCount={comment.queryCount} 
+		          	skill={comment.skill} 
+		          	avatar={serviceurl+comment.avatar}
+		          	gobackurl="search.html"
+					hospitalid = ""
+		          >
+		          </DocComment>
+				);
+			});
+			return (
+				<div className="weui_panel_bd" >
+					  <div className="weui_tab_bd search-doctor-list listItems" id="res-doc-list" ref="search-doctor-list">
+					  	{hrelNodes}
+					  </div>
+					<div className="text-align more_height" id="more" style={style} onClick={this.nextPage}>加载更多</div>
+		        </div>
+			);
+		}
+	}
+
+});
+
+//-----------------------------Search_relist end-------------------------------------------------
+
+var SearchBox = React.createClass({
+	getInitialState: function() {
+		refleshData();
+		return {
+			data: reldata
+		};
+	},
+	componentDidMount: function() {
+		this.setState({
+			data: reldata
+		});
+	},
+	handleCommentSubmit: function(comment) {
+		this.setState({
+			data: comment
+		});
+	},
+	render: function() {
+		return (
+			<div>
+				<Search_Top onCommentSubmit={this.handleCommentSubmit}/>
+				<Search_condition onCommentSubmit={this.handleCommentSubmit} />
+				<Search_Display />
+				<Search_relist onCommentSubmit={this.handleCommentSubmit} data={this.state.data} />
+				<SearchHidden toastText="正在查询" />
+			</div>
+		);
+	}
+});
+
+ReactDOM.render(
+	<SearchBox  data={reldata} />,
+	document.getElementById('content')
+);

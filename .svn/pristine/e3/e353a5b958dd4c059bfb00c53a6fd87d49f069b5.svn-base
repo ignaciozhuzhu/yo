@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>数字化口腔产业分会成立邀请</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main.css?v=1.0?v=1.0" />
+<style>
+    html,body{
+        background-color: #DBF3FF;
+        overflow:auto;
+        background: url(images/yqh.jpg);
+    }
+    .invite .formcon{
+        margin: .15rem 5% .15rem 15%;
+        width:70%;
+    }
+    .invite .height58{
+        height: .58rem;
+    }
+    .invite .height65{
+        height: .65rem;
+        line-height: .6;
+    }
+    .invite .tit{
+        margin: .25rem auto;
+        width: 60%;
+        height: 0;
+        border-top: .3rem solid transparent;
+        border-left: .7rem solid #C59A0B;
+        border-bottom: .1rem solid transparent;
+        border-right: .7rem solid #C59A0B;
+    }
+    .invite h3{
+        text-align: center;
+        margin-top: -.22rem;
+    }
+    .invite .inline{
+        display: inline
+    }
+    .invite .require:after{
+        color:orange;
+        font-size:.3rem;
+        vertical-align: middle;
+        content: "*"
+    }
+    .invite .required:after{
+        color:green;
+        font-size:.3rem;
+        vertical-align: middle;
+        content: "√"
+    }
+    .invite .requiren:after{
+        color:red;
+        font-size:.3rem;
+        vertical-align: middle;
+        content: "×"
+    }
+     #mapContainer{
+        margin:0 auto 20px;
+        height:35% !important;
+        width:70% !important;
+        font-size:12px;
+        position:relative !important;
+    }
+
+</style>
+</head>
+
+<body onload="init()">
+    <div id="content">
+    </div>
+    <div id="mapContainer"></div>
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/invite.js" charset="utf-8"></script>
+
+    <script src="http://cache.amap.com/lbs/static/es5.min.js"></script>
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=0e64281e79717140f05f2f7fef8445ab&plugin=AMap.ToolBar"></script>
+    <script>
+        function init() {
+            map = new AMap.Map("mapContainer", {
+                zoom: 13,
+                center:[116.4809505039, 39.9763580271]
+            });
+            marker = new AMap.Marker({
+                map:map,
+                position:[116.4809505039, 39.9763580271]
+            })
+            marker.setLabel({
+                offset: new AMap.Pixel(20, 20),//修改label相对于maker的位置
+                content: "北京德贝尔口腔"
+            });
+            marker.on('click',function(e){
+                marker.markOnAMAP({
+                    name:'首开广场',
+                    position:marker.getPosition()
+                })
+            })
+        }
+    </script>
+</body>
+</html>

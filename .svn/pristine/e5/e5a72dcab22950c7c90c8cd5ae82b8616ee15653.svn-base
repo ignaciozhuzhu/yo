@@ -1,0 +1,125 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  serviceurl,
+  ipurl,
+  setCookie,
+  getCookie,
+  delCookie,
+  reminder,
+  getURLparam,
+  checknull
+} from '../../js/common.js';
+import {
+  SearchHidden
+} from '../../js/components/searchList';
+import {
+  Navigation
+} from '../../js/components/indexComp.js';
+//轮播功能
+import Slider from 'react-touch-slider';
+
+
+var Hospitalid = "";//医院id
+var longitude = 0;//医院位置的经度
+var latitude = 0;//医院位置的纬度
+var brief = "";//医院简介
+var address =  "";//医院地址
+var avatar = "";//医院的主图
+var imgArr = [];//医院轮播图片数组
+var hospitalName = "";//医院名称
+var phoneNum = "";//医院电话
+
+var Reservation_mainBox = React.createClass({
+  getInitialState: function() {
+    Hospitalid = getURLparam("hospitalID");
+    //医院信息
+    $.ajax({
+      url: serviceurl + "hospital/detail",
+      dataType: 'json',
+      cache: false,
+      data: {
+        "hospitalid": Hospitalid
+      },
+      contentType: "application/json",
+      type: "get",
+      async: false,
+      success: function(data) {
+        console.log("Hospital: " + JSON.stringify(data));
+        if (data.status == "success") {
+          var HospitalInfo = data.data;
+          //医院位置的经度
+          longitude = checknull(HospitalInfo.positionx);
+          //医院位置的纬度
+          latitude = checknull(HospitalInfo.positiony);
+          //医院名称
+          hospitalName = checknull(HospitalInfo.name);
+          //医院简介
+          brief = checknull(HospitalInfo.brief);
+          //医院地址
+          address =  checknull(HospitalInfo.address);
+          //医院电话
+          phoneNum = checknull(HospitalInfo.telephone);
+          //轮播图片
+          imgArr = HospitalInfo.images;
+          var arr = [];
+          arr = imgArr;
+          imgArr = [];
+          $.each(arr,function(idx, item){
+  	          imgArr.push(serviceurl + item);
+          });
+          imgArr = [];
+          //没有轮播图片则展示医院的主图
+          var imgsize = imgArr.length;
+          avatar = serviceurl + HospitalInfo.avatar;
+          if(imgsize<1){
+              imgArr[0] = avatar;
+          }
+        } else if (data.status == "fail") {
+          reminder("医院信息查询失败！");
+          return;
+        } else {
+          reminder("医院信息查询错误！");
+          return;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        reminder("医院信息查询错误！");
+      }.bind(this)
+    });
+    return {
+      data: []
+    };
+  },
+  componentDidMount: function() {
+    
+  },
+  render: function() {
+      var callnum = "tel:"+phoneNum;
+      var goMapURL = "reservation_map.html?hospitalName=" + hospitalName + "&longitude=" + longitude + "&latitude=" + latitude;
+      return (
+        <div>
+          <div className='ExampleSliders'>
+            <Slider autoPlayInterval={3e3} imgs={imgArr}/>
+          </div>
+          <div>{brief}</div>
+          <br/>
+          <a href={callnum}>联系</a>
+          <br/>
+          <a href={goMapURL}>导航</a>
+        </div>
+      );
+  }
+});
+
+ReactDOM.render(
+  <Reservation_mainBox />,
+  document.getElementById('content')
+);
+
+ReactDOM.render(
+  <SearchHidden toastText="正在查询" />,
+  document.getElementById('hiddenContent')
+);

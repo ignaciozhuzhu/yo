@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>数字化口腔产业分会成立邀请</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+    <link href="../images/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css"> 
+<style>
+    html,body{
+        background-color: #DBF3FF;
+        overflow:auto
+    }
+    .invite .formcon{
+    margin: .15rem 5% .15rem 15%;
+    width:70%;
+    }
+    .invite .height58{
+        height: .58rem;
+    }
+    .invite .height65{
+        height: .65rem;
+        line-height: .6;
+    }
+    .invite .tit{
+        margin: .25rem auto;
+        width: 60%;
+        height: 0;
+        border-top: .3rem solid transparent;
+        border-left: .7rem solid #C59A0B;
+        border-bottom: .1rem solid transparent;
+        border-right: .7rem solid #C59A0B;
+    }
+    .invite h3{
+        text-align: center;
+        margin-top: -.22rem;
+    }
+    .invite .inline{
+        display: inline
+    }
+
+</style>
+</head>
+
+<body>
+    <div id="content">
+    </div>
+    <div id="mapContainer"></div>
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/inviteSelect.js" charset="utf-8"></script>
+</body>
+</html>

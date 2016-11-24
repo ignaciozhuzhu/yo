@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>预约挂号——预约信息</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div>
+        <div id="topContent"></div>
+        <div id="centerContent"></div>
+        <div id="downContent"></div>
+    </div>
+    <div id="hiddenContent"></div>
+    <div id="res-datadet-name-show">
+        <div class="weui_mask_transition mask"></div>
+        <div class="weui_actionsheet actionsheet" >
+            
+            <div class="weui_actionsheet_menu displaynone" id="res-datedet-name-show">
+                <div class="weui_actionsheet_cell res-datedet-stopclick pointer">选择联系人</div>
+                <div class="weui_actionsheet_cell pointer" id="res-datedet-peonum">添加联系人</div>
+                <div id="res-datedet-name-list"></div>
+            </div>
+            
+            <div class="weui_actionsheet_menu displaynone" id="res-datedet-time-show">
+                <div class="weui_actionsheet_cell res-datedet-stopclick pointer">选择时间段</div>
+                <div id="res-datedet-time-list" class="res-datedet-list">    
+                </div>
+            </div>
+            
+            <div class="weui_actionsheet_menu displaynone" id="res-datedet-numb-show">
+                <div class="weui_actionsheet_cell res-datedet-stopclick pointer">选择初/复诊</div>
+                <div id="res-datedet-numb-list">
+                    <div class="weui_actionsheet_cell res-datedet-selesct pointer">初诊</div>
+                    <div class="weui_actionsheet_cell res-datedet-selesct pointer">复诊</div>
+                </div>
+            </div>
+            
+            <div class="weui_actionsheet_action actionsheet_cancel">
+                <div class="weui_actionsheet_cell pointer">取消</div>
+            </div>
+        </div>
+    </div>  
+
+      <script src="../js/jquery-1.12.0.min.js" charset="utf-8"></script>
+      <script src="../js/main.js" charset="utf-8"></script>
+      <script src="../js/share.js" charset="utf-8"></script>
+    <script src="js/reservation_datedet.js" charset="utf-8"></script>
+</body>
+</html>

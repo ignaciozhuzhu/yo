@@ -1,0 +1,507 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+	serviceurl,
+	ipurl,
+	setCookie,
+	getCookie,
+	delCookie,
+	reminder,
+	checknull,
+	getMobilTime,
+	getURLparam,
+	getHtmlFontSize
+} from '../../js/common.js';
+import {
+	SearchHidden
+} from '../../js/components/searchList';
+import {
+	Reservation_dialog,
+	Reservation_docList
+} from '../../js/components/reservationComp';
+
+getHtmlFontSize();
+var docData = [];
+var placeData = [];
+var attentive = "关注";
+var hospitalName = "";
+var goDoctorDet = function(clinictype, price, workdate, timeFlag, hospitalName, workdayid, noon) {
+	workdate = getMobilTime(workdate).split("日")[0] + "日";
+	var timedate = workdate.split(" ")[0];
+	var role = "";
+	if (clinictype == 1) {
+		role = "专家预约";
+	} else if (clinictype == 0) {
+		role = "普通预约";
+	}
+	if (role != "") {
+		delCookie("price");
+		setCookie("price", price == "" ? "免费" : price);
+		delCookie("role");
+		setCookie("role", role);
+
+		delCookie("timedate");
+		setCookie("timedate", timedate);
+		delCookie("timeFlag");
+		setCookie("timeFlag", timeFlag);
+
+		delCookie("hospitalName");
+		setCookie("hospitalName", hospitalName);
+		delCookie("workdayID");
+		setCookie("workdayID", workdayid);
+
+		delCookie("noon");
+		setCookie("noon", noon);
+		delCookie("gobackURL");
+		setCookie("gobackURL", ipurl + "/reservation/reservation_resdet.html", 30);
+		location.href = "reservation_datedet.html";
+	}
+};
+var getDoctorID = function() {
+	var urlinfo = window.location.href; //获取当前页面的url 
+	//var len = urlinfo.length; //获取url的长度 
+	var offset = urlinfo.indexOf("?"); //设置参数字符串开始的位置 
+	var val = "";
+	if (offset > 0) {
+		val = getURLparam("doctorid");
+		setCookie("hospitalID", "", 30);
+	} else {
+		val = getCookie("doctorID");
+	}
+	return val;
+};
+
+var Reservation_topBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getDoctorID();
+		$.ajax({
+			url: serviceurl + "doctor/detail", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				if (dt.status == "success") {
+					docData = dt.data;
+					//获取医院名称
+					$.ajax({
+						url: serviceurl + "hospital/detail",
+						type: "get",
+						dataType: "json",
+						data: {
+							"hospitalid": getURLparam("hospitalID")
+						},
+						contentType: "application/json",
+						cache: false,
+						async: false,
+						beforeSend: function(XMLHttpRequest) {},
+						success: function(dt) {
+							console.log(JSON.stringify(dt));
+							if (dt.status == "success") {
+								hospitalName = checknull(dt.data) == "" ? docData.defaulthosname : dt.data.name;
+							} else {
+								hospitalName = docData.defaulthosname;
+							}
+						},
+						complete: function(XMLHttpRequest, textStatus) {},
+						error: function(XMLHttpRequest, textStatus, errorThrown) {}
+					});
+					if (docData.hasAttention == "N") {
+						attentive = "关注";
+					} else {
+						attentive = "已关注";
+					}
+					delCookie("doctorName");
+					setCookie("doctorName", docData.fullname);
+					delCookie("doctorTitle");
+					setCookie("doctorTitle", docData.title);
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				if (XMLHttpRequest.status == 404) {
+					location.href = "../404.html";
+				}
+				reminder("地区列表查询失败！");
+				return;
+			}
+		});
+		return {
+			data: docData
+		};
+	},
+	render: function() {
+		return (
+			<div>
+        		<Reservation_docList data={this.state.data} getDoctorID={getDoctorID()} attentive={attentive} hospitalName={hospitalName} />
+      		</div>
+		);
+	}
+});
+
+ReactDOM.render(
+	<Reservation_topBox data={docData} />,
+	document.getElementById('topContent')
+);
+
+var Reservation_placeBox = React.createClass({
+	getInitialState: function() {
+		var doctorid = getDoctorID();
+		$.ajax({
+			url: serviceurl + "doctor/listHospital", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			async: false,
+			data: {
+				"doctorid": doctorid,
+				"currentPage": "1",
+				"hospitalid": getURLparam("hospitalID")
+			},
+			contentType: "application/json", //内容类型
+			cache: false, //是否异步提交
+			success: function(dt) {
+				console.log("MySuccess: " + JSON.stringify(dt));
+				if (dt.status == "success") {
+					placeData = dt.data;
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("医生接诊地址查询失败！");
+				return;
+			}
+		});
+
+		return {
+			data: placeData
+		};
+	},
+	render: function() {
+		return (
+			<div className="weui_panel weui_panel_access res_det_box clance_border">
+			<div className="weui_panel_bd">
+				<div className=" weui_media_text">
+ 					<Reservation_placeList data={this.state.data} />
+				</div>
+			</div>
+		</div>
+		);
+	}
+});
+
+var Reservation_placeList = React.createClass({
+	componentDidMount: function() {
+		$(".spreadClick").each(function(idx, item) {
+			if (idx == 0) {
+				console.log(idx + "||" + item);
+				$(this).trigger("click");
+			}
+		});
+	},
+	render: function() {
+		var placeNodes = this.props.data.map(function(comment) {
+			return (
+				<PlaceComment 
+	          key={comment.id} 
+	          hospitalID={comment.id} 
+	          listID={"list-"+comment.id} 
+	          hospitalName={comment.name} 
+	          hospitalAdress={comment.position} 
+	          adress={comment.address} 
+
+	          typeID={"typeID-"+comment.id} 
+	          morningID={"morningID-"+comment.id} 
+	          afternoonID={"afternoonID-"+comment.id} 
+	          >
+	          </PlaceComment>
+			);
+		});
+		return (
+			<div >
+        	{placeNodes}
+    	</div>
+		);
+	}
+});
+var PlaceComment = React.createClass({
+	spreadClick: function() {
+		var changeRes = function(text) {
+			if (text == "收起") {
+				$(".toggled")[0].previousSibling.children[2].innerHTML = '<span class="res_det_color"><img src="images/right_caret copy@3x.png" class="res_det_img" /></span>';
+			} else if (text == "展示") {
+				$(".toggled")[0].previousSibling.children[2].innerHTML = '<span class="res_det_color"><img src="images/down_caret copy@2x.png" class="res_det_img" /></span>';
+			}
+		}
+		if ($("#" + this.props.listID).attr("class").indexOf("toggled") == -1) { //点到别的医院,就要收起小桌板
+			$(".res-det-hidelist.toggled").stop().slideToggle();
+			if ($(".toggled").length > 0) {
+				changeRes("展示");
+			}
+			$(".res-det-hidelist.toggled").removeClass("toggled");
+			$("#" + this.props.listID).addClass("toggled");
+			$("#" + this.props.listID).stop().slideToggle();
+			changeRes("收起");
+		} else { //点到自己
+			changeRes("展示");
+			$("#" + this.props.listID).removeClass("toggled");
+			$("#" + this.props.listID).stop().slideToggle();
+		}
+
+		var hospitalID = this.props.hospitalID;
+		var hospitalName = this.props.hospitalName;
+		var doctorid = getDoctorID();
+		var morningID = this.props.morningID;
+		var afternoonID = this.props.afternoonID;
+
+		$("#" + this.props.typeID).html("");
+		$("#" + this.props.morningID).html("");
+		$("#" + this.props.afternoonID).html("");
+		var morningID = this.props.morningID;
+		for (var dateNum = 0; dateNum < 14; dateNum++) {
+			var thisDate = new Date(((new Date()) / 1000 + dateNum * 24 * 60 * 60) * 1000);
+			// var NowTime = Date.parse(thisDate);
+			// var time = getLocalTime(NowTime);
+			// var timedate = time.split(" ")[0];
+			// var timedate1 = timedate.split("/")[1];
+			// var timedate2 = timedate.split("/")[2];
+			var timedate1 = thisDate.getMonth() + 1;
+			var timedate2 = thisDate.getDate();
+			var Day = "";
+			if (thisDate.getDay() == "1") {
+				Day = "周一";
+			} else if (thisDate.getDay() == "2") {
+				Day = "周二";
+			} else if (thisDate.getDay() == "3") {
+				Day = "周三";
+			} else if (thisDate.getDay() == "4") {
+				Day = "周四";
+			} else if (thisDate.getDay() == "5") {
+				Day = "周五";
+			} else if (thisDate.getDay() == "6") {
+				Day = "周六";
+			} else if (thisDate.getDay() == "0") {
+				Day = "周日";
+			}
+
+			$("#" + this.props.typeID).append(
+				"<li class='resdet-data-table-li res-resdet-padding res-resdet-borbot-blue res-resdet-borright-blue pointer' id='" + hospitalID + "-" + timedate1 + "-" + timedate2 + "-date'>" + timedate1 + "-" + timedate2 + "<br />" + Day + "</li>"
+			);
+			$("#" + this.props.morningID).append(
+				"<li class='resdet-data-table-li res-resdet-padding res-resdet-borbot-blue res-resdet-borright-blue pointer' id='" + hospitalID + "-" + timedate1 + "-" + timedate2 + "-morning'></li>"
+			);
+			$("#" + this.props.afternoonID).append(
+				"<li class='resdet-data-table-li res-resdet-padding res-resdet-borright-blue pointer' id='" + hospitalID + "-" + timedate1 + "-" + timedate2 + "-afternoon'></li>"
+			);
+		}
+
+		$.ajax({
+			url: serviceurl + "workDay/query", //请求的Url
+			type: "get", //提交方式
+			dataType: "json", //请求的返回类型 这里为json	
+			data: {
+				"doctorid": doctorid,
+				"hospitalid": hospitalID
+			},
+			contentType: "application/json", //内容类型
+			cache: false,
+			async: false,
+			success: function(dt) {
+				console.log(JSON.stringify(dt));
+				if (dt.status == "success") {
+					var Workday = dt.data;
+					var clinictype = ""
+					$.each(Workday, function(idx, item) {
+						item.clinictype == "0" ? clinictype = "普通预约" : clinictype = "专家预约";
+						// var workdate = getLocalTime(item.workdate);
+						// var worktimedate = workdate.split(" ")[0];
+						var workdate = new Date(item.workdate);
+						// if(worktimedate != "undefine"){
+						if (workdate != "undefine") {
+							// var worktimedate1 = worktimedate.split("/")[1];
+							// var worktimedate2 = worktimedate.split("/")[2];
+							var worktimedate1 = (workdate.getMonth() + 1);
+							var worktimedate2 = workdate.getDate();
+							//上午
+							if (item.morning == 1) {
+								var thisElement = $("#" + hospitalID + "-" + worktimedate1 + "-" + worktimedate2 + "-morning");
+								thisElement.html("<span id='morning" + hospitalID + idx + "'>" + clinictype + "<br/>" + item.price + "元</span>");
+								thisElement.addClass("res-resdet-bg-color");
+								$("#morning" + hospitalID + idx).click(function() {
+									goDoctorDet(item.clinictype, item.price, item.workdate, "上午", hospitalName, item.workdayid, "1");
+								});
+							} else if (item.morning == 0) {
+								var thisElement = $("#" + hospitalID + "-" + worktimedate1 + "-" + worktimedate2 + "-morning");
+								thisElement.html("<span id='morning" + hospitalID + idx + "'>预约已满</span>");
+								thisElement.addClass("res-resdet-bg-color-no");
+								thisElement.click(function() {
+									reminder("该预约已满");
+									return;
+								});
+							}
+							//下午
+							if (item.afternoon == 1) {
+								var thisElement = $("#" + hospitalID + "-" + worktimedate1 + "-" + worktimedate2 + "-afternoon");
+								thisElement.html("<span id='afternoon" + hospitalID + idx + "'>" + clinictype + "<br/>" + item.price + "元</span>");
+								thisElement.addClass("res-resdet-bg-color");
+								$("#afternoon" + hospitalID + idx).click(function() {
+									goDoctorDet(item.clinictype, item.price, item.workdate, "下午", hospitalName, item.workdayid, "0");
+								});
+							} else if (item.afternoon == 0) {
+								var thisElement = $("#" + hospitalID + "-" + worktimedate1 + "-" + worktimedate2 + "-afternoon");
+								thisElement.html("<span id='afternoon" + hospitalID + idx + "'>预约已满</span>");
+								thisElement.addClass("res-resdet-bg-color-no");
+								thisElement.click(function() {
+									reminder("该预约已满");
+									return;
+								});
+							}
+						}
+					});
+
+
+				} else if (dt.status == "fail") {
+					reminder("查询失败");
+					return;
+				} else {
+					reminder("查询错误");
+					return;
+				}
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder("医生接诊地址查询失败！");
+			}
+		});
+	},
+
+	render: function() {
+		return (
+			<div className="res_table_box">
+				<div className="weui_media_title res_det_paddingBox">
+					<span className="res-paddingright8px displaynone"><img src="images/Group 5@2x.png"  className="res_doctor_skill_img"  /></span>
+					<span ref="hospital-name-2">{this.props.hospitalName}</span>
+					<div className="pull-right pointer spreadClick" onClick={this.spreadClick}>
+						<span className="res_det_color" ref="resdetcolor">
+							<img src="images/down_caret copy@2x.png" className="res_det_img"/>
+						</span>
+					</div>
+				</div>
+				<div className="weui_media_desc res-det-padleft res-det-marbot-mx displaynone res-det-hidelist" id={this.props.listID}>
+					
+	             	<div className="weui_media_desc text-align res-det-tableh" ref="res-resdet-table">
+	                 	<div className="pull-left">
+	                    	<div className="res-resdet-bortop-blue res-resdet-borleft-blue res-resdet-borbot-blue-2 text-align res-resdet-padding res-resdet-lefttable-height res_schedul_font">排<br />班</div>
+	                        <div className="res-resdet-borbot-blue-2 res-resdet-borleft-blue text-align res-resdet-padding res-resdet-lefttable-height res_schedul_font">上<br />午</div>
+	                        <div className="res-resdet-borbot-blue-2 res-resdet-borleft-blue text-align res-resdet-padding res-resdet-lefttable-height res_schedul_font">下<br />午</div>
+	                    </div>
+	                    <div className="res-resdet-border-blue res-resdet-righttable scroll" id={this.props.hospitalID}>
+							<div className="hh" id="resdet-data-table">
+						      <ul className="clearfix" id={this.props.typeID}>
+						      </ul>
+						      <ul className="clearfix" id={this.props.morningID}>
+						      </ul>
+						      <ul className="clearfix" id={this.props.afternoonID}>
+
+						      </ul>
+						    </div>
+						</div>
+					</div>
+
+					<div className="res_slide text-align yayi-color pointer">查看更多请向左滑动</div>
+				</div>	
+			</div>
+		);
+	}
+});
+
+ReactDOM.render(
+	<Reservation_placeBox data={placeData} />,
+	document.getElementById('placeContent')
+);
+
+
+var Reservation_centerHidden = React.createClass({
+	componentDidMount: function() {
+		var _params = {
+			"hospitalid": getURLparam("hospitalID"),
+			"doctorid": getURLparam("doctorid")
+		};
+		$.ajax({
+			url: serviceurl + "doctor/listBookinginfo",
+			type: "get",
+			dataType: "json",
+			data: _params,
+			contentType: "application/json",
+			cache: false,
+			async: false,
+			beforeSend: function(XMLHttpRequest) {},
+			success: function(dt) {
+				console.log(JSON.stringify(dt));
+				if (dt.status == "success") {
+					console.log(JSON.stringify(dt));
+					var rulesList = dt.data;
+					$.each(rulesList, function(idx, item) {
+						$("#res_rules_text").text(item.booking_info);
+					});
+				} else {
+					reminder("预约规则查询失败");
+					return;
+				}
+			},
+			complete: function(XMLHttpRequest, textStatus) {},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				reminder(XMLHttpRequest.responseJSON.message);
+				return;
+			}
+		});
+	},
+	goDetail: function() {
+		setCookie("doctorID", getDoctorID());
+		delCookie("gobackURL");
+		setCookie("gobackURL", "reservation_resdet.html");
+		location.href = "reservation_rules.html";
+	},
+	render: function() {
+		return (
+			<div className="res_rules_box">
+		        <div className="weui_panel weui_panel_access res_rules_panel">
+		            <div className="weui_panel_bd">
+		                <div className="weui_media_text res_rules_media_text">
+		                    <div className="weui_media_title res_rules_media_title" id="res_rules_text"></div>
+		                    <div className="res_rules_tit">预约须知</div>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		);
+	}
+});
+ReactDOM.render(
+	<Reservation_centerHidden />,
+	document.getElementById('centerContent')
+);
+
+ReactDOM.render(
+	<SearchHidden toastText="正在查询" />,
+	document.getElementById('hiddenContent')
+);
+
+ReactDOM.render(
+	<Reservation_dialog href="reservation_resdet" getDoctorID={getDoctorID()} getHospitalID={getURLparam("hospitalID")}/>,
+	document.getElementById('dialog')
+);

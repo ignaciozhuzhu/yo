@@ -1,0 +1,341 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  serviceurl,
+  ipurl,
+  setCookie,
+  getCookie,
+  delCookie,
+  reminder,
+  getURLparam
+} from '../../js/common.js';
+import {
+  SearchHidden
+} from '../../js/components/searchList';
+
+var Hospitalid = "";//医院id
+var longitude = 0;//医院位置的经度
+var latitude = 0;//医院位置的纬度
+var brief = "";//医院简介
+var address =  "";//医院地址
+var avatar = "";//医院的主图
+var imgArr = [];//医院轮播图片数组
+var hospitalName = "";//医院名称
+//轮播功能
+var Slider = React.createClass({
+  getDefaultProps() {
+    return {
+      loop: false,
+      selected: 0,
+      showArrows: true,
+      showNav: true,
+    };
+  },
+  getInitialState() {
+    return {
+      dragStart: 0,
+      dragStartTime: new Date(),
+      index: 0,
+      lastIndex: 0,
+      transition: false,
+    };
+  },
+  componentWillMount() {
+    const { selected } = this.props;
+    this.setState({
+      index: selected,
+      lastIndex: selected,
+    });
+  },
+  componentWillReceiveProps(nextProps) {
+    const { selected } = this.props;
+
+    if (selected !== nextProps.selected) {
+      this.goToSlide(nextProps.selected);
+    }
+  },
+
+  getDragX(event, isTouch) {
+    return isTouch ?
+      event.touches[0].pageX :
+      event.pageX;
+  },
+  handleDragStart(event, isTouch) {
+    const x = this.getDragX(event, isTouch);
+
+    this.setState({
+      dragStart: x,
+      dragStartTime: new Date(),
+      transition: false,
+      slideWidth: ReactDOM.findDOMNode(this.refs.slider).offsetWidth,
+    });
+  },
+  handleDragMove(event, isTouch) {
+    const {
+      dragStart,
+      lastIndex,
+      slideWidth,
+    } = this.state;
+    const x = this.getDragX(event, isTouch);
+    const offset = dragStart - x;
+    const percentageOffset = offset / slideWidth;
+    const newIndex = lastIndex + percentageOffset;
+    const SCROLL_OFFSET_TO_STOP_SCROLL = 30;
+    // Stop scrolling if you slide more than 30 pixels
+    if (Math.abs(offset) > SCROLL_OFFSET_TO_STOP_SCROLL) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.setState({
+      index: newIndex,
+    });
+  },
+  handleDragEnd() {
+    const {
+      children,
+    } = this.props;
+    const {
+      dragStartTime,
+      index,
+      lastIndex,
+    } = this.state;
+    const timeElapsed = new Date().getTime() - dragStartTime.getTime();
+    const offset = lastIndex - index;
+    const velocity = Math.round(offset / timeElapsed * 10000);
+    let newIndex = Math.round(index);
+    if (Math.abs(velocity) > 5) {
+      newIndex = velocity < 0 ? lastIndex + 1 : lastIndex - 1;
+    }
+
+    if (newIndex < 0) {
+      newIndex = 0;
+    } else if (newIndex >= children.length) {
+      newIndex = children.length - 1;
+    }
+    this.setState({
+      dragStart: 0,
+      index: newIndex,
+      lastIndex: newIndex,
+      transition: true,
+    });
+  },
+  goToSlide(index, event) {
+    const {
+      children,
+      loop,
+    } = this.props;
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (index < 0) {
+      index = loop ? children.length - 1 : 0;
+    } else if (index >= children.length) {
+      index = loop ? 0 : children.length - 1;
+    }
+    this.setState({
+      index: index,
+      lastIndex: index,
+      transition: true,
+    })
+  },
+  renderNav() {
+    const { children } = this.props;
+    const { lastIndex } = this.state;
+    const nav = children.map((slide, i) => {
+      const buttonClasses = i === lastIndex ? 'Slider-navButton Slider-navButton--active' : 'Slider-navButton';
+      return (
+        <button
+          className={ buttonClasses }
+          key={ i }
+          onClick={ (event) => this.goToSlide(i, event) } />
+      );
+    })
+    return (
+      <div className='Slider-nav'>{ nav }</div>
+    );
+  },
+
+  renderArrows() {
+    const {
+      children,
+      loop,
+      showNav,
+    } = this.props;
+    const { lastIndex } = this.state;
+    const arrowsClasses = showNav ? 'Slider-arrows' : 'Slider-arrows Slider-arrows--noNav';
+
+    return (
+      <div className={ arrowsClasses }>
+        { loop || lastIndex > 0 ?
+          <button
+            className='Slider-arrow Slider-arrow--left'
+            onClick={ (event) => this.goToSlide(lastIndex - 1, event) } /> : null }
+        { loop || lastIndex < children.length - 1 ?
+          <button
+            className='Slider-arrow Slider-arrow--right'
+            onClick={ (event) => this.goToSlide(lastIndex + 1, event) } /> : null }
+      </div>
+    );
+  },
+
+  render() {
+    const {
+      children,
+      showArrows,
+      showNav,
+    } = this.props;
+    const {
+      index,
+      transition,
+    } = this.state;
+    const slidesStyles = {
+      width: `${ 100 * children.length }%`,
+      transform: `translateX(${ -1 * index * (100 / children.length) }%)`,
+    };
+    const slidesClasses = transition ? 'Slider-slides Slider-slides--transition' : 'Slider-slides';
+
+    return (
+      <div className='Slider' ref='slider'>
+        { showArrows ? this.renderArrows() : null }
+        { showNav ? this.renderNav() : null }
+
+        <div
+          className='Slider-inner'
+          onTouchStart={ (event) => this.handleDragStart(event, true) }
+          onTouchMove={ (event) => this.handleDragMove(event, true) }
+          onTouchEnd={ () => this.handleDragEnd(true) }>
+          <div
+            className={ slidesClasses }
+            style={ slidesStyles }>
+            { children }
+          </div>
+        </div>
+      </div>
+    );
+  }
+});
+
+
+var Personal_mainBox = React.createClass({
+  getInitialState: function() {
+    return {
+      data: []
+    };
+  },
+  componentDidMount: function() {
+    Hospitalid = getURLparam("hospitalID");
+    //医院信息
+    $.ajax({
+      url: serviceurl + "hospital/detail",
+      dataType: 'json',
+      cache: false,
+      data: {
+        "hospitalid": Hospitalid
+      },
+      contentType: "application/json",
+      type: "get",
+      async: false,
+      success: function(data) {
+        console.log("Hospital: " + JSON.stringify(data));
+        if (data.status == "success") {
+          var HospitalInfo = data.data;
+          //医院位置的经度
+          longitude = HospitalInfo.positionx;
+          //医院位置的纬度
+          latitude = HospitalInfo.positiony;
+          //医院名称
+          hospitalName = HospitalInfo.name;
+          //医院简介
+          brief = HospitalInfo.brief;
+          //医院地址
+          address =  HospitalInfo.address;
+
+          //初始化地图
+          var map = new BMap.Map("container");          // 创建地图实例  
+          var point = new BMap.Point(longitude, latitude);  // 创建点坐标  
+          map.centerAndZoom(point, 16);                 // 初始化地图，设置中心点坐标和地图级别  
+          //map.addControl(new BMap.MapTypeControl());   //地图类型控件，默认位于地图右上方。
+          map.addControl(new BMap.GeolocationControl()); //定位控件，针对移动端开发，默认位于地图左下方。
+          var opts = {    
+            width : 80,     // 信息窗口宽度    
+            height: 30,     // 信息窗口高度    
+            title : hospitalName // 信息窗口标题   
+          }    
+          var infoWindow = new BMap.InfoWindow(address, opts);  // 创建信息窗口对象    
+          map.openInfoWindow(infoWindow, map.getCenter());      // 打开信息窗口
+          var marker = new BMap.Marker(point);        // 创建标注    
+          map.addOverlay(marker);                     // 将标注添加到地图中
+          marker.addEventListener("click", function(){    
+            map.openInfoWindow(infoWindow, map.getCenter());      // 打开信息窗口 
+          });
+
+
+
+          //医院的主图
+          avatar = serviceurl + HospitalInfo.avatar;
+          imgArr = HospitalInfo.images;
+          
+          var ExampleSlider = React.createClass({
+            render() {
+              var imgsize = imgArr.length;
+              if(imgsize<1){
+                return (
+                  <div><img src={avatar} width="100%" /></div>
+                );
+              }else{
+                var htmlstr = "";
+                $.each(imgArr, function(index, item){
+                    htmlstr += "<div><img src=\""+serviceurl+item+"\" width=\"100%\"/></div>";
+                });
+
+                return (
+                  <div className='ExampleSliders'>
+                    <Slider>
+                      
+                    </Slider>
+                  </div>
+                );
+              }
+            }
+          });
+          ReactDOM.render(
+            <ExampleSlider />,
+            document.getElementById('slider')
+          );
+          // $("#header").attr("src", serviceurl + HospitalInfo.avatar);
+        } else if (data.status == "fail") {
+          reminder("医院信息查询失败！");
+          return;
+        } else {
+          reminder("医院信息查询错误！");
+          return;
+        }
+      }.bind(this),
+      error: function(xhr, status, err) {
+        reminder("医院信息查询错误！");
+      }.bind(this)
+    });
+  },
+  render: function() {
+    return (
+      <div>
+        <div id="slider">
+        </div>
+        <a href="tel:13958053543">拨打电话</a>
+      </div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <Personal_mainBox />,
+  document.getElementById('content')
+);
+
+ReactDOM.render(
+  <SearchHidden toastText="正在查询" />,
+  document.getElementById('hiddenContent')
+);

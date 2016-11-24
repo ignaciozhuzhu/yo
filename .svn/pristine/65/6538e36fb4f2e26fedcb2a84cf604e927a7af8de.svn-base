@@ -1,0 +1,618 @@
+'use strict';
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import * as Common from './Common.js';
+import {
+  thisurl,
+  serviceurl,
+  ipurl,
+  downDistance,
+  setCookie,
+  getCookie,
+  delCookie,
+  getURLPram,
+  clearCookies,
+  getCityIDByName,
+  reminder,
+  reminderSuccess,
+  getLocalTime,
+  checknull,
+  MoneyConversion,
+  MoneyValue,
+  toDecimal,
+  getMobilTime,
+  plusZero,
+  getHtmlFontSize
+} from '../../js/common.js';
+import {
+  SearchHidden
+} from '../../js/components/searchList.js';
+
+
+getHtmlFontSize();
+
+var showNum = 9;
+var historyNum = 10;
+var astNum = 10;
+var searchHotwords = function(countyCode, keyWord){
+    $("#HotwordsArea").show();
+    $("#DetailArea").hide();
+    $("#AssociationArea").hide();
+    $.ajax({
+        url: serviceurl+"hotword/list",
+        dataType: 'json',
+        cache: false,
+        data : {
+          countycode:countyCode,
+          keyword:keyWord
+        },
+        contentType : "application/json",
+        type : "get", 
+        async: false,
+        beforeSend:function(XMLHttpRequest){
+          $("#loading-toast").css("display","block");
+        }, 
+        success: function(dt) {
+          console.log("hotword: " + JSON.stringify(dt));
+          $("#Hotwords_box").html("");
+          $("#loading-toast").css("display","none");
+          var HotwordsList = dt.data;
+          if(HotwordsList.length>0){
+              $.each(HotwordsList,function(idx,item){
+              if( idx < showNum){
+                  $("#Hotwords_box").append(
+                      "<span class='searchHotwords_box wrap-class hotwordcss'>"+ item.word + "</span>"
+                    );
+                  }
+              });
+              $(".hotwordcss").click(function(){
+                  var thistext = this.textContent;
+                  showDetail(thistext);
+              });
+          }else{
+              $("#Hotwords_box").append(
+                  "<a class='weui_cell'>"+
+                      "<div class='weui_cell_bd weui_cell_primary'>"+
+                          "<p class='fontsize14'>暂无热词结果</p>"+
+                      "</div>"+
+                  "</a>"
+                );
+          }
+        }.bind(this),
+        error: function(xhr, status, err) {
+            $("#loading-toast").css("display","none");
+            reminder(err.toString());
+        }.bind(this)
+    });
+    refleshHos();
+};
+
+var refleshHos = function(){
+    //注入历史记录
+    $("#SearchHistory_box").html("");
+    var searchHosStr = checknull(getCookie("searchHos"));
+    var arr = searchHosStr.split(" ");
+    if(searchHosStr != ""){
+        var htmlstr = "";
+        $.each(arr, function(idx,item){
+            if( item != "" && idx<historyNum){
+              htmlstr += 
+                "<a class='weui_cell search_history_det' href='#'>"+
+                  "<div class='weui_cell_hd'><img src='images/search.png' class='search_history_img' /></div>"+
+                  "<div class='weui_cell_bd weui_cell_primary historycss wrap-class'>"+
+                    "<span class='weui_media_title'>" + item + "</span>"+
+                  "</div>"+
+                  "<div class='history_detelet'><img src='images/x.png' class='search_delete_img' /></div>"+
+                "</a>";
+            }
+        });
+        htmlstr += "<div class='search_history_detall' id='clearbtn'>清除历史记录</div>";
+        $("#SearchHistory_box").append(htmlstr);
+        $(".historycss").click(function(){
+            var thistext = this.textContent;
+            showDetail(thistext);
+        });
+        $(".history_detelet").click(function(){
+            //这里进行单独删除搜索记录
+            removeHos(this.parentElement.text);
+            refleshHos();
+        });
+        $("#clearbtn").click(function(){
+            setCookie("searchHos","",30);
+            searchHotwords("", "");
+        });
+    }else{
+        $("#SearchHistory_box").append( 
+            "<a class='weui_cell' href='#'>"+
+                "<div class='weui_cell_bd weui_cell_primary'>"+
+                    "<p class='fontsize14'>暂无搜索记录</p>"+
+                "</div>"+
+            "</a>"
+        );
+    }
+};
+
+var removeHos = function(str){
+    //注入历史记录
+    $("#SearchHistory_box").html("");
+    var searchHosStr = checknull(getCookie("searchHos"));
+    var resArr = [];
+    if(searchHosStr != ""){
+        var arr = searchHosStr.split(" ");
+        $.each(arr, function(idx,item){
+            if(item != str){
+                resArr.push(item);
+            }
+        });
+    }
+    searchHosStr = resArr.join(" ");
+    setCookie("searchHos", searchHosStr, 30);
+};
+
+var showDetail = function(thistext){
+    //搜索文本框赋值
+    $("#search_input").val(thistext);
+    //记录搜索历史记录
+    var searchHosStr = checknull(getCookie("searchHos"));
+    var arr = searchHosStr.split(" ");
+    if(arr.length>0){
+        $.each(arr, function(idx,item){
+            var isrepetition = false;
+            $.each(arr, function(index,items){
+                if(items == thistext){
+                    isrepetition = true;
+                }
+            });
+            if(!isrepetition){
+                if(idx==0){
+                    searchHosStr = thistext + " " + item;
+                }else{
+                    searchHosStr += " " + item;
+                }
+            }
+        });
+    }else{
+        searchHosStr = thistext;
+    }
+    setCookie("searchHos", searchHosStr, 30);
+    //隐藏热门推荐和历史记录
+    $("#HotwordsArea").hide();
+    $("#AssociationArea").hide();
+    //展示搜索内容
+    $("#DetailArea").show();
+    searchHos(thistext);
+    searchDoc(thistext);
+};
+var searchHos = function(searchText){
+    //搜索医院
+    $.ajax({
+      url: serviceurl+"hospital/list",
+      dataType: 'json',
+      cache: false,
+      data : {
+        currentPage:"",
+        countycode:"", //checknull(getCookie("cityID")),
+        keyword:searchText
+      },
+      contentType : "application/json",
+      type : "get", 
+      async: false,
+      beforeSend:function(XMLHttpRequest){
+        $("#loading-toast").css("display","block");
+      }, 
+      success: function(dt) {
+        $("#loading-toast").css("display","none");
+        if( dt.data.length == 0){
+          $("#res-hos-title").css("display","block");
+          $("#res-hos-list").html("<div class='text-align res-docoter-color'>未搜索到相关医院</div>");
+        }else{
+          var hosList = dt.data;
+          $("#res-hos-list").html("");
+          $.each(hosList,function(idx,item){
+            if(idx<2){
+              goHospitalDet(item.id,item.name);
+            }
+          });
+          if(hosList.length>2){
+            $("#res-hos-list").append("<div class=\"search_more\" id=\"hosmore\" >更多相关医院</div>");
+            $("#hosmore").click(function(){
+                location.href="reservation_hosList.html";
+            });
+          }
+        }
+        console.log("success: " + JSON.stringify(dt));
+      }.bind(this),
+      error: function(xhr, status, err) {
+        $("#loading-toast").css("display","none");
+        reminder(err.toString());
+      }.bind(this)
+    });
+};
+
+var searchDoc = function(searchText){
+    $.ajax({
+      url: serviceurl+"doctor/list",
+      dataType: 'json',
+      cache: false,
+      data : {
+        hospitalid:"",
+        keyword:searchText,
+        countycode:""  //checknull(getCookie("cityID"))
+      },
+      contentType : "application/json",
+      type : "get", 
+      async: false, 
+      success: function(dt) {
+        if( dt.data.length == 0){
+          $("#res-doc-title").css("display","block");
+          $("#res-doc-list").html("<div class='text-align res-docoter-color'>未搜索到相关医生</div>");
+        }else{
+          var docList = dt.data;
+          $("#res-doc-list").html("");
+          $.each(docList,function(idx,item){
+            if(idx<2){
+              goDoctorDet(item.id, item.fullname);
+            }
+          });
+          if(docList.length>2){
+            $("#res-doc-list").append("<div class=\"search_more \" id=\"docmore\" >更多相关医生</div>");
+            $("#docmore").click(function(){
+                  location.href="reservation_docList.html";
+            });
+          }
+        }
+        console.log("success: " + JSON.stringify(dt));
+      }.bind(this),
+      error: function(xhr, status, err) {
+        reminder(err.toString());
+      }.bind(this)
+    });
+};
+
+var goHospitalDet = function(hospitalID, hospitalName){
+    // $("#search_input").val(hospitalName);
+    $.ajax({
+        url: serviceurl+"hospital/detail",
+        dataType: 'json',
+        cache: false,
+        data : {
+          hospitalid:hospitalID
+        },
+        contentType : "application/json",
+        type : "get", 
+        async: false,
+        beforeSend:function(XMLHttpRequest){
+          $("#loading-toast").css("display","block");
+        }, 
+        success: function(dt) {
+          $("#loading-toast").css("display","none");
+          $("#res-hos-title").css("display","block");
+          $("#res-doc-title").css("display","block");
+          if( dt.data.length == 0){
+              $("#res-hos-list").html("<div class='text-align res-docoter-color'>未搜索到相关医院</div>");
+          }else{
+             var hos = dt.data;
+
+             var grade = hos.grade;
+              if(grade=="3"){
+                grade = "三";
+              }else if(grade=="2"){
+                grade = "二";
+              }else{
+                grade = "一";
+              }
+              var level = hos.level;
+              if(level=="3"){
+                level = "丙";
+              }else if(level=="2"){
+                level = "乙";
+              }else if(level=="1"){
+                level = "甲";
+              }else{
+                level = "特";
+              }
+             var htmlval = "";
+             htmlval = "<div class=\"weui_panel weui_panel_access\" id=\"thishospital"+hospitalID+"\">       "
+                    +"  <div class=\"weui_panel_bd res-hos-listbg pointer\" >                     "
+                    +"   <div class=\"weui_media_box weui_media_appmsg clance_border\">                                         "
+                    +"    <div class=\"weui_media_hd res_hos_imgbox_width\">                      "
+                    +"      <img class=\"img-responsive center-block wx_avatar_img\" src="+serviceurl+hos.avatar+" /> "
+                    +"    </div>                                                                                  "
+                    +"    <div class=\"weui_media_bd res-listcss\">                                               "
+                    +"      <div class=\"hospital\">                                                            "
+                    +"        <span class=\"weui_media_title res-doc-name res-hos-hoscolor\">                 "
+                    +"          "+hos.name+"                                                           "
+                    +"        </span>                                                                         "
+                    +"      </div>                                                                              "
+                    +"      <div class=\"weui_media_desc res-doc-con-text res-hos-concolor\">                   "
+                    +"        "+hos.address+"                                                            "
+                    +"      </div>                                                                              "
+                    +"      <div class=\"weui_media_desc res-hos-numcolor\">                                    "
+                    +"        <div class=\"res-doc-con-yy\">"+grade+"级"+level+"等</div>    "
+                    +"        <div class=\"res-doc-con-null\"></div>                                          "
+                    +"        <div class=\"res-doc-con-yy\">预约量：                                          "
+                    +"          <span>"+hos.bookingCount+"</span>                                      "
+                    +"        </div>                                                                          "
+                    +"      </div>                                                                              "
+                    +"    </div>                                                                                  "
+                    +"   </div>                                                                                     "
+                    +"  </div>                                                                                      "
+                    +"</div>                                                                                        ";
+             // $("#res-hos-list").html("");
+             $("#res-hos-list").append(htmlval);
+             $("#thishospital"+hospitalID).click(function(){
+                goHosDet(hospitalID);
+              });
+          }
+          console.log("success: " + JSON.stringify(dt));
+        }.bind(this),
+        error: function(xhr, status, err) {
+          $("#loading-toast").css("display","none");
+          reminder(err.toString());
+        }.bind(this)
+      });
+};
+
+var goDoctorDet = function(doctorID, doctorName){
+    // $("#search_input").val(doctorName);
+    $.ajax({
+        url: serviceurl+"doctor/detail",
+        dataType: 'json',
+        cache: false,
+        data : {
+          doctorid:doctorID
+        },
+        contentType : "application/json",
+        type : "get", 
+        async: false,
+        beforeSend:function(XMLHttpRequest){
+          $("#loading-toast").css("display","block");
+        }, 
+        success: function(dt) {
+          $("#loading-toast").css("display","none");
+          $("#res-hos-title").css("display","block");
+          $("#res-doc-title").css("display","block");
+          if( dt.data.length == 0){
+              $("#res-doc-list").html("<div class='text-align res-docoter-color'>未搜索到相关医生</div>");
+          }else{
+             var doc = dt.data;
+             var htmlval = "";
+             htmlval =   "<div class=\"weui_panel weui_panel_access\" id=\"thisDoctor"+doctorID+"\">                                                   "
+                    +"<div class=\"weui_panel_bd res-hos-listbg pointer\" >                                                       "
+                    +"  <div class=\"weui_media_box weui_media_appmsg clance_border\" >                                                 "
+                    +"  <div class=\"weui_media_hd rmargin0 text-left res_doc_imgbox\">                                                                     "
+                    +"  <img class=\"img-rounded\" width=\"65px\" height=\"65px\" src="+serviceurl+doc.avatar+"/>     "
+                    +"  </div>                                                                                          "
+                    +"  <div class=\"weui_media_bd res-listcss\">                                                         "
+                    +"  <div class=\"doctor\">                                                                            "
+                    +"    <span class=\"weui_media_title res-doc-name pull-left\">                                        "
+                    +"    "+doc.fullname+"                                                                       "
+                    +"    </span>                                                                                       "
+                    +"    <span class=\"weui_btn weui_btn_mini weui_btn_primary pull-right res-doc-hosbtn\" >预约</span>  "
+                    +"    <span class=\"res-doc-name\">  "+doc.title+" </span>                                      "
+                    +"  </div>                                                                                          "
+                    +"  <div class=\"weui_media_desc res-doc-con\">                                                       "
+                    +"  <div class=\"res-doc-con-yy\">预约量：                                                            "
+                    +"    <span >  "+doc.bookingCount+" </span>                                                 "
+                    +"  </div>                                                                                          "
+                    +"  <div class=\"res-doc-con-null\"></div>                                                            "
+                    +"  <div class=\"res-doc-con-yy\">咨询量：                                                            "
+                    +"    <span > "+doc.queryCount+" </span>                                                    "
+                    +"  </div>                                                                                          "
+                    +"  </div>                                                                                          "
+                    +"  <div class=\"weui_media_desc res-doc-con-text\"> "+doc.skill+" </div>                       "
+                    +"  </div>                                                                                          "
+                    +"  </div>                                                                                          "
+                    +"</div>                                                                                            "
+                    +"</div>                                                                                              ";
+             // $("#res-doc-list").html("");
+             $("#res-doc-list").append(htmlval);
+             $("#thisDoctor"+doctorID).click(function(e){
+                goDocDet(doctorID,e);
+             });
+          }
+          console.log("success: " + JSON.stringify(dt));
+        }.bind(this),
+        error: function(xhr, status, err) {
+          $("#loading-toast").css("display","none");
+          reminder(err.toString());
+        }.bind(this)
+      });
+};
+
+var goHosDet = function(hospitalID){
+    // delCookie("hospitalID");
+    // setCookie("hospitalID", hospitalID);
+    delCookie("gobackURL");
+    setCookie("gobackURL", "reservation_doc.html");
+    location.href = "reservation_doc.html?hospitalID=" + hospitalID;
+};
+
+var goDocDet = function(doctorID, e){
+    // delCookie("doctorID");
+    // setCookie("doctorID", doctorID);
+    delCookie("gobackURL");
+    setCookie("gobackURL", "reservation_hos.html");
+    location.href = "reservation_det.html?doctorid=" + doctorID + "&hospitalID=";
+    if (e.target.textContent == "预约") {
+			location.href = "reservation_resdet.html?doctorid=" + doctorID + "&hospitalID=";
+		} else {
+			location.href = "reservation_det.html?doctorid=" + doctorID + "&hospitalID=";
+		}
+};
+
+var Reservation_Search = React.createClass({
+  searchClick: function(){
+      //每一次文本变化都进行查询
+      var searchText = this.refs.search_input.value;
+      searchAstwords(checknull(getCookie("cityID")), searchText);
+  },
+  labelClick: function(){
+      var searchText = this.refs.search_input.value;
+      //searchText.style.display = "none";
+      showDetail(searchText);
+  },
+  cancelClick: function(){
+      //取消就是返回前一页面
+      // location.href = "reservation_hos.html";
+      history.go(-1);
+  },
+  enterClick: function(e){
+      //如果是搜索键，则搜索详细结果
+      if(e.keyCode==13){
+          var searchText = this.refs.search_input.value;
+          showDetail(searchText);
+          return false;
+      }
+  },
+  render: function() {
+    return (
+      <div>
+          <div className="serch-bg">
+            <div className="weui_search_bar weui_search_bar_top_bprder serch-bg" ref="search_bar">
+                <div className="weui_search_outer search_box" >
+                  <div className="weui_search_inner search_box_det">
+                    <i className="weui_icon_search search_i"></i>
+                    <input type="search" className="weui_search_input" ref="search_input" id="search_input" placeholder="请输入医院名称或医生姓名" onChange={this.searchClick} onKeyDown={this.enterClick}/>
+                  </div>  
+                </div> 
+                <a href="javascript:" className="weui_search_cancel" ref="search_cancel" onClick={this.cancelClick}>取消</a>
+                <div className="weui_search_inner search_btn_box">
+                  <a className="weui_btn weui_btn_mini weui_btn_default search_sbtn clance_border" href="javascript:;" onClick={this.labelClick} >搜索</a>
+                </div>
+            </div>
+          </div> 
+      </div>
+    );
+  }
+});
+
+var Reservation_List = React.createClass({
+  render: function(){
+    return (
+      <div className="weui_panel_bd" id="DetailArea" >
+        <div className="res_ser_title search_titleBox displaynone" id="res-hos-title">相关医院</div>
+        <div id="res-hos-list">
+        </div>
+        <div className="res_ser_title search_titleBox displaynone" id="res-doc-title">相关医生</div>
+        <div id="res-doc-list">
+        </div>
+      </div>
+    );
+  }
+});
+
+var Reservation_Hotwords = React.createClass({
+  componentDidMount: function(){
+    var countyCode = "";//checknull(getCookie("cityID"));
+    var keyWord = "";
+    searchHotwords(countyCode,keyWord);
+  },
+  render: function(){
+    return (
+      <div className="tab" id="HotwordsArea" >
+        <div className="bd">
+            <div className="weui_cells_title search_titleBox">热门推荐</div>
+            <div className="weui_cells weui_cells_access clance_border" id="Hotwords_box"></div>
+        </div>
+        <div className="bd">
+            <div className="weui_cells_title search_titleBox">搜索记录</div>
+            <div className="weui_cells weui_cells_access clance_border" id="SearchHistory_box"></div>
+        </div>
+      </div>
+    );
+  }
+});
+//联想图层
+var searchAstwords = function(countyCode,keyWord){
+    if(keyWord==""){
+      //刷新历史记录
+      refleshHos();
+      $("#HotwordsArea").show();
+      $("#DetailArea").hide();
+      $("#AssociationArea").hide();
+      return;
+    }
+    //隐藏搜索详情
+    $("#DetailArea").hide();
+    $("#HotwordsArea").hide();
+    $("#AssociationArea").show();
+    $.ajax({
+        url: serviceurl+"hotword/list",
+        dataType: 'json',
+        cache: false,
+        data : {
+          countycode:"",
+          keyword:keyWord
+        },
+        contentType : "application/json",
+        type : "get", 
+        async: false,
+        beforeSend:function(XMLHttpRequest){
+          $("#loading-toast").css("display","block");
+        }, 
+        success: function(dt) {
+          $("#Association_box").html("");
+          $("#loading-toast").css("display","none");
+          var wordsList = dt.data;
+          if(wordsList.length>0){
+              $.each(wordsList,function(idx,item){
+              if( idx < astNum){
+                  $("#Association_box").append(
+                      "<div class='weui_cell_bd weui_cell_primary historycss wrap-class'>"+
+                        "<span class='weui_media_title'>" + item.word + "</span>"+
+                      "</div>"
+                    );
+                  }
+              });
+              $(".historycss").click(function(){
+                  var thistext = this.textContent;
+                  showDetail(thistext);
+              });
+          }else{
+              $("#Association_box").append(
+                "<a class='weui_cell'>"+
+                    "<div class='weui_cell_bd weui_cell_primary'>"+
+                        "<p class='fontsize14'>暂无联想结果</p>"+
+                    "</div>"+
+                "</a>"
+              );
+          }
+        }.bind(this),
+        error: function(xhr, status, err) {
+            $("#loading-toast").css("display","none");
+            reminder(err.toString());
+        }.bind(this)
+    });
+};
+var Reservation_Association = React.createClass({
+  render: function(){
+    return(
+      <div className="tab" id="AssociationArea" >
+        <div className="bd">
+            <div className="weui_cells weui_cells_access clance_border" id="Association_box"></div>
+        </div>
+      </div>
+    );
+  }
+});
+var Reservation_Box = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  render: function() {
+    return (
+      <div>
+        <Reservation_Search />
+        <Reservation_Hotwords />
+        <Reservation_List />
+        <Reservation_Association />
+        <SearchHidden toastText="正在查询" />
+      </div>
+    );
+  }
+});
+ReactDOM.render(
+  <Reservation_Box />,
+  document.getElementById('content')
+);

@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>免责声明</title>
+    <link rel="stylesheet" href="../css/weui.min.css" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="weui_panel weui_panel_access">
+        <div class="weui_panel_hd color-black"><h2>公众号免责声明</h2></div>
+        <div class="weui_panel_bd lmargin3 rmargin1">
+
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">1、一切移动客户端用户在下载并浏览公众号时均被视为已经仔细阅读本条款并完全同意。凡以任何方式登陆本公众号，或直接、间接使用本公众号资料者，均被视为自愿接受本网站相关声明和用户服务协议的约束。</p>
+            </div>
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">2、公众号转载的内容并不代表公众号之意见及观点，也不意味着本网赞同其观点或证实其内容的真实性。</p>
+            </div>
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">3、公众号转载的文字、图片、音视频等资料均由本公众号用户提供，其真实性、准确性和合法性由信息发布人负责。公众号不提供任何保证，并不承担任何法律责任。</p>
+            </div>
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">4、A公众号所转载的文字、图片、音视频等资料，如果侵犯了第三方的知识产权或其他权利，责任由作者或转载者本人承担，本公众号对此不承担责任。 </p>
+            </div>
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">5、公众号不保证为向用户提供便利而设置的外部链接的准确性和完整性，同时，对于该外部链接指向的不由公众号实际控制的任何网页上的内容，公众号不承担任何责任。</p>
+            </div>
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">6、用户明确并同意其使用公众号网络服务所存在的风险将完全由其本人承担；因其使用公众号网络服务而产生的一切后果也由其本人承担，公众号对此不承担任何责任。</p>
+            </div> 
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">7、除公众号注明之服务条款外，其它因不当使用本公众号而导致的任何意外、疏忽、合约毁坏、诽谤、版权或其他知识产权侵犯及其所造成的任何损失，公众号概不负责，亦不承担任何法律责任。</p>
+            </div> 
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">8、对于因不可抗力或因黑客攻击、通讯线路中断等公众号不能控制的原因造成的网络服务中断或其他缺陷，导致用户不能正常使用公众号，公众号不承担任何责任，但将尽力减少因此给用户造成的损失或影响。</p>
+            </div> 
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">9、本声明未涉及的问题请参见国家有关法律法规，当本声明与国家有关法律法规冲突时，以国家法律法规为准。</p>
+            </div> 
+            <div class="weui_media_box weui_media_text">
+                <p class="per-mz-text">10、本网站相关声明版权及其修改权、更新权和最终解释权均属公众号所有。</p>
+            </div> 
+
+        </div>
+        
+    </div>
+</body>
+</html>

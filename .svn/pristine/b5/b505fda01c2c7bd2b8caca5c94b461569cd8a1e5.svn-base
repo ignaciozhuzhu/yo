@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录</title>
+  <link rel="stylesheet" href="css/weui.min.css" type="text/css" />
+  <link href="css/main.css" rel="stylesheet" type="text/css">
+  <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+</head>
+
+<body>
+    <div class="container-fluid">
+      <!-- <div class="reg-padding" ></div>
+      <div class="row"><img src="images/logo2.png" class="img-rounded img-responsive center-block" width="91px;"/></div>
+      <div class="reg-padding"></div> -->
+    </div>
+  
+  <div id="content"></div>
+  
+  <script src="js/jquery-1.12.0.min.js" charset="utf-8"></script>
+  <script src="js/share.js" charset="utf-8"></script>
+  <script src="js/main.js" charset="utf-8"></script>
+
+  <script src="js/login.js" charset="utf-8"></script>
+</body>
+</html>
